@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Klasme Group — Em Breve</title>
-  <meta name="description" content="Klasme Group. Grandes marcas de cosméticos asiáticas chegando em breve.">
+  <meta name="description" content="Klasme Group. Grandes marcas de cosméticos chinesas chegando em breve.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,22 +24,21 @@
       box-sizing: border-box;
     }
 
-    html, body {
-      height: 100%;
+    html {
+      scroll-behavior: smooth;
     }
 
     body {
       position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
       background: var(--black);
       color: var(--white);
       font-family: 'Jost', sans-serif;
-      overflow: hidden;
-      padding: 24px;
+      cursor: default;
+    }
+
+    ::selection {
+      background: rgba(201, 161, 90, 0.35);
+      color: var(--white);
     }
 
     /* Ambient luxury glow background */
@@ -60,7 +59,7 @@
       100% { transform: scale(1.08) translateY(-10px); opacity: 1; }
     }
 
-    /* Fine noise/texture vignette */
+    /* Fine vignette */
     .vignette {
       position: fixed;
       inset: 0;
@@ -69,24 +68,86 @@
       box-shadow: inset 0 0 18vw rgba(0, 0, 0, 0.85);
     }
 
-    .content {
-      position: relative;
+    /* Cursor glow that follows the pointer (desktop only) */
+    .cursor-glow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 160px;
+      height: 160px;
+      margin-left: -80px;
+      margin-top: -80px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201, 161, 90, 0.14), transparent 70%);
+      pointer-events: none;
       z-index: 1;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      will-change: transform;
+    }
+
+    @media (hover: none) {
+      .cursor-glow { display: none; }
+    }
+
+    /* Floating gold particles */
+    .particles {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .particles span {
+      position: absolute;
+      bottom: -10px;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--gold-soft);
+      opacity: 0;
+      animation: rise linear infinite;
+      box-shadow: 0 0 6px rgba(230, 207, 158, 0.8);
+    }
+
+    @keyframes rise {
+      0%   { transform: translateY(0) translateX(0); opacity: 0; }
+      10%  { opacity: 0.7; }
+      90%  { opacity: 0.4; }
+      100% { transform: translateY(-105vh) translateX(var(--drift, 20px)); opacity: 0; }
+    }
+
+    /* Hero */
+    .hero {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      min-height: 100vh;
+      padding: 90px 24px 60px;
+    }
+
+    .content {
       display: flex;
       flex-direction: column;
       align-items: center;
-      text-align: center;
       max-width: 640px;
       width: 100%;
     }
 
     .logo-wrap {
+      position: relative;
       opacity: 0;
       transform: translateY(18px) scale(0.97);
       animation: reveal 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
     }
 
     .logo-wrap img {
+      display: block;
       width: min(78vw, 420px);
       height: auto;
       filter: drop-shadow(0 0 40px rgba(201, 161, 90, 0.12));
@@ -132,13 +193,41 @@
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
+    /* Rotating phrases */
+    .rotator {
+      position: relative;
+      height: 20px;
+      margin-top: 18px;
+      opacity: 0;
+      animation: reveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) 1.4s forwards;
+    }
+
+    .rotator span {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      transform: translate(-50%, 6px);
+      font-size: 0.68rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(201, 161, 90, 0.65);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .rotator span.is-active {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
     /* Countdown */
     .countdown {
       display: flex;
       gap: clamp(10px, 3vw, 26px);
-      margin-top: 46px;
+      margin-top: 40px;
       opacity: 0;
-      animation: reveal 1.3s cubic-bezier(0.16, 1, 0.3, 1) 1.5s forwards;
+      animation: reveal 1.3s cubic-bezier(0.16, 1, 0.3, 1) 1.6s forwards;
     }
 
     .countdown .unit {
@@ -185,7 +274,7 @@
     }
 
     .date-note {
-      margin-top: 26px;
+      margin-top: 24px;
       font-size: 0.72rem;
       letter-spacing: 0.18em;
       text-transform: uppercase;
@@ -194,15 +283,89 @@
       animation: reveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) 1.8s forwards;
     }
 
-    footer {
-      position: relative;
-      z-index: 1;
-      margin-top: 56px;
-      font-size: 0.68rem;
-      letter-spacing: 0.14em;
-      color: rgba(247, 244, 238, 0.28);
+    /* Email signup — visual only, backend to be wired later */
+    .signup {
+      margin-top: 44px;
+      width: 100%;
+      max-width: 380px;
       opacity: 0;
-      animation: reveal 1.2s ease 2.1s forwards;
+      animation: reveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) 2s forwards;
+    }
+
+    .signup-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(247, 244, 238, 0.5);
+      margin-bottom: 12px;
+    }
+
+    .signup-form {
+      display: flex;
+      border: 1px solid rgba(201, 161, 90, 0.3);
+      border-radius: 4px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(6px);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .signup-form:focus-within {
+      border-color: rgba(201, 161, 90, 0.7);
+      box-shadow: 0 0 24px rgba(201, 161, 90, 0.12);
+    }
+
+    .signup-form input {
+      flex: 1;
+      min-width: 0;
+      padding: 14px 16px;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--white);
+      font-family: 'Jost', sans-serif;
+      font-size: 0.82rem;
+      letter-spacing: 0.03em;
+    }
+
+    .signup-form input::placeholder {
+      color: rgba(247, 244, 238, 0.35);
+    }
+
+    .signup-form button {
+      padding: 0 20px;
+      border: none;
+      background: var(--gold);
+      color: var(--black);
+      font-family: 'Jost', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .signup-form button:hover {
+      background: var(--gold-soft);
+    }
+
+    .signup-note {
+      margin-top: 10px;
+      font-size: 0.65rem;
+      letter-spacing: 0.04em;
+      color: rgba(247, 244, 238, 0.32);
+      min-height: 1em;
+      transition: color 0.3s ease;
+    }
+
+    .signup-note.is-success {
+      color: var(--gold-soft);
+    }
+
+    .signup-note.is-error {
+      color: #d98a8a;
     }
 
     @media (max-width: 420px) {
@@ -210,43 +373,75 @@
       .countdown .unit { min-width: 54px; padding: 10px 4px; }
       .countdown .sep { font-size: 1.2rem; }
     }
+
+    /* Footer */
+    footer {
+      position: relative;
+      z-index: 2;
+      padding: 40px 24px 48px;
+      text-align: center;
+    }
+
+    .copyright {
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      color: rgba(247, 244, 238, 0.28);
+    }
   </style>
 </head>
 <body>
   <div class="glow"></div>
   <div class="vignette"></div>
+  <div class="cursor-glow" id="cursor-glow"></div>
+  <div class="particles" id="particles"></div>
 
-  <main class="content">
-    <div class="logo-wrap">
-      <img src="assets/imgs/KLASME-GROUP-LOGO.png" alt="Klasme Group">
+  <main class="hero">
+    <div class="content">
+      <div class="logo-wrap">
+        <img src="assets/imgs/KLASME-GROUP-LOGO.png" alt="Klasme Group">
+      </div>
+
+      <div class="divider"></div>
+
+      <p class="tagline">Em breve</p>
+      <p class="subtext">
+        Uma nova era da beleza chinesa está chegando ao Brasil.
+        Grandes marcas, uma só assinatura de excelência.
+      </p>
+
+      <div class="rotator" id="rotator" aria-hidden="true"></div>
+
+      <div class="countdown" id="countdown" aria-label="Contagem regressiva para o lançamento">
+        <div class="unit"><span class="value" id="cd-days">00</span><span class="label">Dias</span></div>
+        <span class="sep">:</span>
+        <div class="unit"><span class="value" id="cd-hours">00</span><span class="label">Horas</span></div>
+        <span class="sep">:</span>
+        <div class="unit"><span class="value" id="cd-minutes">00</span><span class="label">Min</span></div>
+        <span class="sep">:</span>
+        <div class="unit"><span class="value" id="cd-seconds">00</span><span class="label">Seg</span></div>
+      </div>
+
+      <p class="date-note">Lançamento em 04 de setembro</p>
+
+      <div class="signup">
+        <p class="signup-label">Seja o primeiro a saber</p>
+        <form class="signup-form" id="signup-form">
+          <input type="email" name="email" placeholder="Seu melhor e-mail" required aria-label="Seu e-mail">
+          <button type="submit" id="signup-button">Avisar-me</button>
+        </form>
+        <p class="signup-note" id="signup-note">&nbsp;</p>
+      </div>
     </div>
-
-    <div class="divider"></div>
-
-    <p class="tagline">Em breve</p>
-    <p class="subtext">
-      Uma nova era da beleza asiática está chegando ao Brasil.
-      Grandes marcas, uma só assinatura de excelência.
-    </p>
-
-    <div class="countdown" id="countdown" aria-label="Contagem regressiva para o lançamento">
-      <div class="unit"><span class="value" id="cd-days">00</span><span class="label">Dias</span></div>
-      <span class="sep">:</span>
-      <div class="unit"><span class="value" id="cd-hours">00</span><span class="label">Horas</span></div>
-      <span class="sep">:</span>
-      <div class="unit"><span class="value" id="cd-minutes">00</span><span class="label">Min</span></div>
-      <span class="sep">:</span>
-      <div class="unit"><span class="value" id="cd-seconds">00</span><span class="label">Seg</span></div>
-    </div>
-
-    <p class="date-note">Lançamento em 04 de setembro</p>
   </main>
 
-  <footer>&copy; <span id="year"></span> Klasme Group. Todos os direitos reservados.</footer>
+  <footer>
+    <p class="copyright">&copy; <span id="year"></span> Klasme Group. Todos os direitos reservados.</p>
+  </footer>
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
 
+    /* Countdown */
     var targetDate = new Date('2026-09-04T00:00:00-03:00').getTime();
 
     var els = {
@@ -286,6 +481,99 @@
 
     tick();
     var timer = setInterval(tick, 1000);
+
+    /* Rotating phrases */
+    var phrases = [
+      'Pele. Ritual. Origem.',
+      'Beleza chinesa, curada para você',
+      'Ingredientes raros, resultados visíveis',
+      'Uma seleção exclusiva Klasme Group'
+    ];
+    var rotator = document.getElementById('rotator');
+    var rotatorSpans = phrases.map(function (text, i) {
+      var span = document.createElement('span');
+      span.textContent = text;
+      if (i === 0) span.classList.add('is-active');
+      rotator.appendChild(span);
+      return span;
+    });
+
+    var rotatorIndex = 0;
+    setInterval(function () {
+      rotatorSpans[rotatorIndex].classList.remove('is-active');
+      rotatorIndex = (rotatorIndex + 1) % rotatorSpans.length;
+      rotatorSpans[rotatorIndex].classList.add('is-active');
+    }, 3800);
+
+    /* Cursor glow */
+    var cursorGlow = document.getElementById('cursor-glow');
+    if (window.matchMedia('(hover: hover)').matches) {
+      window.addEventListener('mousemove', function (e) {
+        cursorGlow.style.opacity = '1';
+        cursorGlow.style.transform = 'translate(' + e.clientX + 'px,' + e.clientY + 'px)';
+      });
+      window.addEventListener('mouseleave', function () {
+        cursorGlow.style.opacity = '0';
+      });
+    }
+
+    /* Floating gold particles */
+    var particlesEl = document.getElementById('particles');
+    var particleCount = 22;
+    for (var p = 0; p < particleCount; p++) {
+      var particle = document.createElement('span');
+      var left = Math.random() * 100;
+      var duration = 10 + Math.random() * 12;
+      var delay = Math.random() * 14;
+      var drift = (Math.random() * 60 - 30) + 'px';
+      particle.style.left = left + '%';
+      particle.style.setProperty('--drift', drift);
+      particle.style.animationDuration = duration + 's';
+      particle.style.animationDelay = delay + 's';
+      particlesEl.appendChild(particle);
+    }
+
+    /* Email signup — envia para uma planilha do Google Sheets via Apps Script.
+       O deploy do Apps Script não retorna cabeçalhos CORS legíveis, então o
+       fetch usa mode: 'no-cors' — a resposta fica opaca (não dá pra ler o
+       corpo), mas o envio em si funciona normalmente. */
+    var SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycby1KqSJwX78SI3dHAavlIbFaO8jOM7e2JQEQom7slB5k4C-gQr8ISG7_UyW7MsYrk8e/exec';
+
+    var signupForm = document.getElementById('signup-form');
+    var signupNote = document.getElementById('signup-note');
+    var signupButton = document.getElementById('signup-button');
+
+    signupForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      var email = signupForm.email.value.trim();
+      if (!email) return;
+
+      signupButton.disabled = true;
+      signupNote.classList.remove('is-success', 'is-error');
+      signupNote.textContent = 'Enviando...';
+
+      var body = new URLSearchParams();
+      body.append('email', email);
+
+      fetch(SHEET_ENDPOINT, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: body
+      })
+        .then(function () {
+          signupNote.textContent = 'Obrigado! Você será avisado em primeira mão.';
+          signupNote.classList.add('is-success');
+          signupForm.reset();
+        })
+        .catch(function () {
+          signupNote.textContent = 'Não foi possível enviar. Tente novamente.';
+          signupNote.classList.add('is-error');
+        })
+        .finally(function () {
+          signupButton.disabled = false;
+        });
+    });
   </script>
 </body>
 </html>
