@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Klasme Group — Em Breve</title>
-  <meta name="description" content="Klasme Group. Grandes marcas de cosméticos chinesas chegando em breve.">
+  <title>Klasmē Group — Em Breve</title>
+  <meta name="description" content="Klasmē Group. Grandes marcas de cosméticos chinesas chegando em breve.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,8 +56,15 @@
     }
 
     @keyframes drift {
-      0%   { transform: scale(1) translateY(0); opacity: 0.85; }
-      100% { transform: scale(1.08) translateY(-10px); opacity: 1; }
+      0% {
+        transform: scale(1) translateY(0);
+        opacity: 0.85;
+      }
+
+      100% {
+        transform: scale(1.08) translateY(-10px);
+        opacity: 1;
+      }
     }
 
     /* Fine vignette */
@@ -87,7 +95,9 @@
     }
 
     @media (hover: none) {
-      .cursor-glow { display: none; }
+      .cursor-glow {
+        display: none;
+      }
     }
 
     /* Floating gold particles */
@@ -112,10 +122,23 @@
     }
 
     @keyframes rise {
-      0%   { transform: translateY(0) translateX(0); opacity: 0; }
-      10%  { opacity: 0.7; }
-      90%  { opacity: 0.4; }
-      100% { transform: translateY(-105vh) translateX(var(--drift, 20px)); opacity: 0; }
+      0% {
+        transform: translateY(0) translateX(0);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 0.7;
+      }
+
+      90% {
+        opacity: 0.4;
+      }
+
+      100% {
+        transform: translateY(-105vh) translateX(var(--drift, 20px));
+        opacity: 0;
+      }
     }
 
     /* Hero */
@@ -162,7 +185,9 @@
     }
 
     @keyframes expand {
-      to { width: 160px; }
+      to {
+        width: 160px;
+      }
     }
 
     .tagline {
@@ -190,7 +215,10 @@
     }
 
     @keyframes reveal {
-      to { opacity: 1; transform: translateY(0) scale(1); }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
 
     /* Rotating phrases */
@@ -372,9 +400,18 @@
     }
 
     @media (max-width: 420px) {
-      .countdown { gap: 8px; }
-      .countdown .unit { min-width: 54px; padding: 10px 4px; }
-      .countdown .sep { font-size: 1.2rem; }
+      .countdown {
+        gap: 8px;
+      }
+
+      .countdown .unit {
+        min-width: 54px;
+        padding: 10px 4px;
+      }
+
+      .countdown .sep {
+        font-size: 1.2rem;
+      }
     }
 
     /* Footer */
@@ -392,6 +429,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="glow"></div>
   <div class="vignette"></div>
@@ -401,7 +439,7 @@
   <main class="hero">
     <div class="content">
       <div class="logo-wrap">
-        <img src="assets/imgs/KLASME-GROUP-LOGO.png" alt="Klasme Group">
+        <img src="assets/imgs/KLASME-GROUP-LOGO.png" alt="Klasmē Group">
       </div>
 
       <div class="divider"></div>
@@ -438,7 +476,7 @@
   </main>
 
   <footer>
-    <p class="copyright">&copy; <span id="year"></span> Klasme Group. Todos os direitos reservados.</p>
+    <p class="copyright">&copy; <span id="year"></span> Klasmē Group. Todos os direitos reservados.</p>
   </footer>
 
   <script>
@@ -489,7 +527,7 @@
     var phrases = [
       'C-beauty chega ao Brasil',
       'Estética oriental, herança milenar',
-      'Uma curadoria exclusiva Klasme Group'
+      'Uma curadoria exclusiva Klasmē Group'
     ];
     var rotator = document.getElementById('rotator');
     var rotatorSpans = phrases.map(function (text, i) {
@@ -578,4 +616,5 @@
     });
   </script>
 </body>
+
 </html>
