@@ -182,6 +182,11 @@
   .ks-product-center {
     left: 50%;
     transform: translateX(-53%);
+    /* Kept even after switching to a lightweight WebP (was a 1.6MB SVG):
+       aspect-ratio still guarantees the browser knows this box's width
+       immediately, from CSS alone, regardless of connection speed —
+       cheap insurance against the exact bug this replaced. */
+    aspect-ratio: 758 / 1108;
   }
 </style>
 </head>
@@ -237,7 +242,7 @@
          centers the box; nudging to -53% centers the actual visual mass
          instead, which is what reads as "aligned" to the eye. -->
     <img data-product-hero data-float
-         src="imgs/batom-sem-fundo.svg"
+         src="imgs/batom.webp"
          alt="Produto em destaque"
          class="ks-product-center absolute top-14 z-10 h-[13rem] w-auto drop-shadow-[0_40px_55px_rgba(0,0,0,0.65)] sm:h-[15rem] md:top-14 md:h-[24rem] lg:h-[28rem]">
 
