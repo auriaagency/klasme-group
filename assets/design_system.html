@@ -168,6 +168,21 @@
   [data-tooltip]:hover::after { opacity: 1; transform: translate(-50%, 0); }
 
   .ks-modal-backdrop { background: rgba(5,5,5,.72); backdrop-filter: blur(6px); }
+
+  /* Centering transforms for the two hero images GSAP animates, defined
+     here (plain synchronous CSS) instead of as Tailwind classes. Tailwind's
+     CDN build generates utility classes asynchronously at runtime; if GSAP
+     touched `transform` on these elements before that generation finished,
+     the missing translate got permanently baked into GSAP's own inline
+     style on first load, requiring a reload to self-correct. */
+  .ks-hero-word-center {
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .ks-product-center {
+    left: 50%;
+    transform: translateX(-53%);
+  }
 </style>
 </head>
 <body class="bg-ink-950 text-ivory-50 antialiased font-sans selection:bg-gold-500/30">
@@ -209,7 +224,7 @@
        Sized down a lot on small screens: at the desktop size, it would be
        wider than most phones and collide with the product image below. -->
   <img data-hero-word src="imgs/KLASME-GROUP-LOGO.png" alt=""
-       class="pointer-events-none absolute top-[42%] left-1/2 z-0 w-[13rem] max-w-none -translate-x-1/2 -translate-y-1/2 select-none opacity-90 sm:w-[16rem] md:top-1/2 md:w-[34rem] lg:w-[42rem] xl:w-[48rem]">
+       class="ks-hero-word-center pointer-events-none absolute top-[42%] z-0 w-[13rem] max-w-none select-none opacity-90 sm:w-[16rem] md:top-1/2 md:w-[34rem] lg:w-[42rem] xl:w-[48rem]">
   <h1 class="sr-only">Klasmē Group</h1>
 
   <div id="hero" class="relative z-10 mx-auto flex min-h-[calc(60vh-6rem)] max-w-5xl items-center justify-center px-6 pb-20 pt-8 md:min-h-[calc(100vh-6rem)] md:px-14">
@@ -224,7 +239,7 @@
     <img data-product-hero data-float
          src="imgs/batom-sem-fundo.svg"
          alt="Produto em destaque"
-         class="absolute left-1/2 top-14 z-10 h-[13rem] w-auto -translate-x-[53%] drop-shadow-[0_40px_55px_rgba(0,0,0,0.65)] sm:h-[15rem] md:top-14 md:h-[24rem] lg:h-[28rem]">
+         class="ks-product-center absolute top-14 z-10 h-[13rem] w-auto drop-shadow-[0_40px_55px_rgba(0,0,0,0.65)] sm:h-[15rem] md:top-14 md:h-[24rem] lg:h-[28rem]">
 
     <!-- Floating glass badge, mirrors bloom-premium's product tag -->
     <div data-reveal data-float data-hero-fade class="ks-glass absolute right-6 top-1/3 z-20 hidden max-w-[13rem] flex-col gap-1 rounded-2xl px-5 py-4 shadow-2xl shadow-black/40 md:flex lg:right-16">
