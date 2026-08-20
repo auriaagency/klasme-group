@@ -27,7 +27,6 @@
         colors: {
           ink: { 950: '#050505', 900: '#0a0a0a', 800: '#121212', 700: '#1c1a17' },
           ivory: { 50: '#f7f4ee', 200: '#e9e3d8' },
-          gold: { 400: '#e6cf9e', 500: '#c9a15a', 600: '#a67c3d', 700: '#7c5b28' },
           success: { DEFAULT: '#8fae7c' },
           warning: { DEFAULT: '#d9b06a' },
           danger:  { DEFAULT: '#d98a8a' }
@@ -47,8 +46,6 @@
   :root {
     --ink-950: #050505;
     --ink-900: #0a0a0a;
-    --gold-500: #c9a15a;
-    --gold-400: #e6cf9e;
   }
 
   * { -webkit-tap-highlight-color: transparent; }
@@ -115,7 +112,7 @@
   /* Faint rotating conic sheen behind the hero — a slow, elegant light sweep */
   .ks-aurora {
     background: conic-gradient(from 0deg at 50% 45%,
-      transparent 0deg, rgba(201,161,90,.10) 60deg, transparent 130deg,
+      transparent 0deg, rgba(255,255,255,.09) 60deg, transparent 130deg,
       rgba(255,255,255,.05) 210deg, transparent 280deg, transparent 360deg);
   }
 
@@ -129,7 +126,7 @@
   }
   .ks-marquee:hover .ks-marquee-track { animation-play-state: paused; }
 
-  /* Floating gold particles, reused from the launch page */
+  /* Floating white particles, reused from the launch page */
   @keyframes ks-rise {
     0%   { transform: translateY(0) translateX(0); opacity: 0; }
     10%  { opacity: .7; }
@@ -138,13 +135,13 @@
   }
   .ks-particle {
     position: absolute; bottom: -5%; width: 3px; height: 3px; border-radius: 999px;
-    background: var(--gold-400); box-shadow: 0 0 6px rgba(230,207,158,.8);
+    background: #ffffff; box-shadow: 0 0 6px rgba(255,255,255,.75);
     animation: ks-rise linear infinite;
   }
 
-  /* Gold gradient text */
-  .ks-gold-text {
-    background: linear-gradient(115deg, #7c5b28, #e6cf9e 45%, #c9a15a 65%, #7c5b28);
+  /* Monochrome shimmer text */
+  .ks-shine-text {
+    background: linear-gradient(115deg, #6b6b6b, #ffffff 45%, #c9c9c9 65%, #6b6b6b);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
 
@@ -169,6 +166,59 @@
 
   .ks-modal-backdrop { background: rgba(5,5,5,.72); backdrop-filter: blur(6px); }
 
+  /* Shine sweep — a thin gloss highlight crosses every .ks-btn on hover,
+     regardless of its color scheme. Layered above the content on purpose
+     (translucent + fast + diagonal reads as a light reflection, not an
+     obstruction) — the signature "something new" touch on every button. */
+  .ks-btn { position: relative; overflow: hidden; isolation: isolate; }
+  .ks-btn::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -60%;
+    width: 40%; height: 100%;
+    background: linear-gradient(115deg, transparent, rgba(255,255,255,.5), transparent);
+    transform: skewX(-20deg);
+    transition: left .65s cubic-bezier(.4,0,.2,1);
+    pointer-events: none;
+  }
+  .ks-btn:hover::after { left: 130%; }
+
+  /* Fill-invert — the outline/secondary button's signature move: black
+     sweeps in from the left on hover, text flips to white in sync. */
+  .ks-btn-fill {
+    position: relative;
+    z-index: 0;
+    color: #050505;
+    transition: color .45s cubic-bezier(.65,0,.35,1);
+  }
+  .ks-btn-fill::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #050505;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .45s cubic-bezier(.65,0,.35,1);
+    z-index: -1;
+  }
+  .ks-btn-fill:hover { color: #f7f4ee; }
+  .ks-btn-fill:hover::before { transform: scaleX(1); }
+
+  /* Animated underline — grows from the left on hover instead of a
+     static <u>. Used by the tertiary/text-link button. */
+  .ks-link-underline { position: relative; }
+  .ks-link-underline::after {
+    content: '';
+    position: absolute;
+    left: 0; bottom: -3px;
+    width: 100%; height: 2px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .35s cubic-bezier(.65,0,.35,1);
+  }
+  .ks-link-underline:hover::after { transform: scaleX(1); }
+
   /* Centering transforms for the two hero images GSAP animates, defined
      here (plain synchronous CSS) instead of as Tailwind classes. Tailwind's
      CDN build generates utility classes asynchronously at runtime; if GSAP
@@ -190,7 +240,7 @@
   }
 </style>
 </head>
-<body class="bg-ink-950 text-ivory-50 antialiased font-sans selection:bg-gold-500/30">
+<body class="bg-ink-950 text-ivory-50 antialiased font-sans selection:bg-white/25">
 
 <!-- ============================================================ -->
 <!-- 1. HERO — live demonstration of the system's signature motion -->
@@ -210,7 +260,7 @@
   <!-- Ambient gradient orbs — drifting continuously, plus scroll parallax on top -->
   <div data-parallax data-speed="-0.16" class="pointer-events-none absolute inset-0 opacity-70">
     <div class="ks-drift-a absolute -left-32 bottom-0 h-[28rem] w-[28rem] rounded-full bg-white/[0.07] blur-[110px]"></div>
-    <div class="ks-drift-b absolute right-0 top-16 h-[24rem] w-[24rem] rounded-full bg-gold-500/10 blur-[110px]"></div>
+    <div class="ks-drift-b absolute right-0 top-16 h-[24rem] w-[24rem] rounded-full bg-white/10 blur-[110px]"></div>
   </div>
   <div class="pointer-events-none absolute inset-0 opacity-[0.05] ks-noise"></div>
   <div class="pointer-events-none absolute inset-x-6 top-0 bottom-0 hidden md:grid grid-cols-3 border-x border-white/10 md:inset-x-14 ks-grid-overlay opacity-40"></div>
@@ -281,7 +331,7 @@
     <i data-lucide="chevron-down" class="h-4 w-4 animate-bounce"></i>
   </div>
 
-  <!-- Floating gold particles, sparse -->
+  <!-- Floating white particles, sparse -->
   <div class="pointer-events-none absolute inset-0 z-10 overflow-hidden" id="hero-particles"></div>
 </section>
 
@@ -303,7 +353,7 @@
   <div class="relative mx-auto max-w-2xl">
     <h2 data-reveal class="font-display text-4xl leading-[1.1] tracking-tight md:text-6xl">
       Sistema de
-      <span class="ks-gold-text italic font-accent">Design</span>
+      <span class="ks-shine-text italic font-accent">Design</span>
     </h2>
 
     <p data-reveal class="mt-6 font-accent text-xl italic leading-relaxed text-ivory-200/80 md:text-2xl">
@@ -331,7 +381,7 @@
 <!-- 2. TYPOGRAPHY -->
 <!-- ============================================================ -->
 <section id="tipografia" class="relative overflow-hidden bg-ivory-50 px-6 py-24 text-ink-950 md:px-14">
-  <div data-parallax data-speed="0.1" class="pointer-events-none absolute -right-40 top-20 h-[30rem] w-[30rem] rounded-full bg-gold-500/10 blur-[120px]"></div>
+  <div data-parallax data-speed="0.1" class="pointer-events-none absolute -right-40 top-20 h-[30rem] w-[30rem] rounded-full bg-white/10 blur-[120px]"></div>
 
   <div class="relative mb-16 grid gap-10 lg:grid-cols-12">
     <span data-reveal class="ks-mono lg:col-span-2 self-start rounded-full border border-ink-950/15 px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-ink-950/60">01 — Sistema</span>
@@ -466,7 +516,7 @@
 <!-- ============================================================ -->
 <section id="cores" class="relative overflow-hidden bg-ink-950 px-6 py-24 text-ivory-50 md:px-14">
   <div class="pointer-events-none absolute inset-0 opacity-[0.04] ks-noise"></div>
-  <div data-parallax data-speed="0.14" class="pointer-events-none absolute -left-40 bottom-0 h-[32rem] w-[32rem] rounded-full bg-gold-500/10 blur-[130px]"></div>
+  <div data-parallax data-speed="0.14" class="pointer-events-none absolute -left-40 bottom-0 h-[32rem] w-[32rem] rounded-full bg-white/10 blur-[130px]"></div>
 
   <div class="relative mb-16 grid gap-10 lg:grid-cols-12">
     <span data-reveal class="ks-mono lg:col-span-2 self-start rounded-full border border-white/15 px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-ivory-200/60">02 — Sistema</span>
@@ -481,7 +531,7 @@
       <div class="p-5">
         <p class="text-sm font-semibold">ink-950 <span class="ks-mono text-[11px] font-normal text-ivory-200/40">· neutral / base</span></p>
         <p class="ks-mono mt-1 text-[11px] text-ivory-200/50">#050505 · rgb(5,5,5) · hsl(0,0%,2%)</p>
-        <p class="mt-3 text-xs leading-relaxed text-ivory-200/60">Fundo primário de todas as páginas. Contraste AAA contra ivory-50 e gold-400.</p>
+        <p class="mt-3 text-xs leading-relaxed text-ivory-200/60">Fundo primário de todas as páginas — e o acento da marca: o preto carrega o refinamento, não uma cor de destaque à parte. Contraste AAA contra ivory-50.</p>
       </div>
     </div>
 
@@ -525,46 +575,6 @@
       </div>
     </div>
 
-    <!-- gold-500 -->
-    <div data-reveal class="overflow-hidden rounded-2xl border border-gold-500/40 bg-white/[0.02]">
-      <div class="h-28 bg-gold-500 border-b border-white/10"></div>
-      <div class="p-5">
-        <p class="text-sm font-semibold text-gold-400">gold-500 <span class="ks-mono text-[11px] font-normal text-ivory-200/40">· primary / accent</span></p>
-        <p class="ks-mono mt-1 text-[11px] text-ivory-200/50">#c9a15a · rgb(201,161,90) · hsl(38,51%,57%)</p>
-        <p class="mt-3 text-xs leading-relaxed text-ivory-200/60">CTA primário, bordas de destaque, ícones ativos. AA contra ink-950; usar texto ink-950 sobre este fundo.</p>
-      </div>
-    </div>
-
-    <!-- gold-400 -->
-    <div data-reveal class="overflow-hidden rounded-2xl border border-gold-500/40 bg-white/[0.02]">
-      <div class="h-28 bg-gold-400 border-b border-white/10"></div>
-      <div class="p-5">
-        <p class="text-sm font-semibold text-gold-400">gold-400 <span class="ks-mono text-[11px] font-normal text-ivory-200/40">· primary / hover</span></p>
-        <p class="ks-mono mt-1 text-[11px] text-ivory-200/50">#e6cf9e · rgb(230,207,158) · hsl(41,59%,76%)</p>
-        <p class="mt-3 text-xs leading-relaxed text-ivory-200/60">Estado hover de botões dourados e realces tipográficos (itálico, links).</p>
-      </div>
-    </div>
-
-    <!-- gold-600 -->
-    <div data-reveal class="overflow-hidden rounded-2xl border border-gold-500/40 bg-white/[0.02]">
-      <div class="h-28 bg-gold-600 border-b border-white/10"></div>
-      <div class="p-5">
-        <p class="text-sm font-semibold text-gold-400">gold-600 <span class="ks-mono text-[11px] font-normal text-ivory-200/40">· primary / active</span></p>
-        <p class="ks-mono mt-1 text-[11px] text-ivory-200/50">#a67c3d · rgb(166,124,61) · hsl(35,46%,45%)</p>
-        <p class="mt-3 text-xs leading-relaxed text-ivory-200/60">Estado pressed/active de botões e realces sobre fundo claro.</p>
-      </div>
-    </div>
-
-    <!-- gold-700 -->
-    <div data-reveal class="overflow-hidden rounded-2xl border border-gold-500/40 bg-white/[0.02]">
-      <div class="h-28 bg-gold-700 border-b border-white/10"></div>
-      <div class="p-5">
-        <p class="text-sm font-semibold text-gold-400">gold-700 <span class="ks-mono text-[11px] font-normal text-ivory-200/40">· primary / border</span></p>
-        <p class="ks-mono mt-1 text-[11px] text-ivory-200/50">#7c5b28 · rgb(124,91,40) · hsl(35,51%,32%)</p>
-        <p class="mt-3 text-xs leading-relaxed text-ivory-200/60">Bordas douradas discretas sobre fundo escuro; nunca como texto.</p>
-      </div>
-    </div>
-
     <!-- success -->
     <div data-reveal class="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
       <div class="h-28 bg-success border-b border-white/10"></div>
@@ -599,23 +609,23 @@
   <!-- Opacity ramp + gradients -->
   <div data-reveal class="relative mt-14 grid gap-6 lg:grid-cols-2">
     <div class="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
-      <p class="ks-mono mb-4 text-[11px] uppercase tracking-[0.2em] text-ivory-200/50">Rampa de opacidade — gold-500</p>
+      <p class="ks-mono mb-4 text-[11px] uppercase tracking-[0.2em] text-ivory-200/50">Rampa de opacidade — ivory-50</p>
       <div class="flex overflow-hidden rounded-xl border border-white/10">
-        <div class="h-16 flex-1 bg-gold-500/10 flex items-end p-2 ks-mono text-[10px] text-ivory-200/60">10%</div>
-        <div class="h-16 flex-1 bg-gold-500/20 flex items-end p-2 ks-mono text-[10px] text-ivory-200/60">20%</div>
-        <div class="h-16 flex-1 bg-gold-500/40 flex items-end p-2 ks-mono text-[10px] text-ivory-200/60">40%</div>
-        <div class="h-16 flex-1 bg-gold-500/60 flex items-end p-2 ks-mono text-[10px] text-ink-950/70">60%</div>
-        <div class="h-16 flex-1 bg-gold-500/80 flex items-end p-2 ks-mono text-[10px] text-ink-950/70">80%</div>
-        <div class="h-16 flex-1 bg-gold-500 flex items-end p-2 ks-mono text-[10px] text-ink-950/70">100%</div>
+        <div class="h-16 flex-1 bg-white/10 flex items-end p-2 ks-mono text-[10px] text-ivory-200/60">10%</div>
+        <div class="h-16 flex-1 bg-white/20 flex items-end p-2 ks-mono text-[10px] text-ivory-200/60">20%</div>
+        <div class="h-16 flex-1 bg-white/40 flex items-end p-2 ks-mono text-[10px] text-ivory-200/70">40%</div>
+        <div class="h-16 flex-1 bg-white/60 flex items-end p-2 ks-mono text-[10px] text-ink-950/70">60%</div>
+        <div class="h-16 flex-1 bg-white/80 flex items-end p-2 ks-mono text-[10px] text-ink-950/70">80%</div>
+        <div class="h-16 flex-1 bg-white flex items-end p-2 ks-mono text-[10px] text-ink-950/70">100%</div>
       </div>
     </div>
     <div class="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
       <p class="ks-mono mb-4 text-[11px] uppercase tracking-[0.2em] text-ivory-200/50">Gradientes decorativos</p>
       <div class="grid grid-cols-2 gap-4">
-        <div class="h-16 rounded-xl" style="background:linear-gradient(115deg,#7c5b28,#e6cf9e 45%,#c9a15a 65%,#7c5b28)"></div>
+        <div class="h-16 rounded-xl" style="background:linear-gradient(115deg,#3a3a3a,#ffffff 45%,#c9c9c9 65%,#3a3a3a)"></div>
         <div class="h-16 rounded-xl bg-gradient-to-t from-ink-950 via-ink-950/40 to-transparent border border-white/10"></div>
       </div>
-      <p class="mt-3 text-xs text-ivory-200/50">Aurora Gold (títulos em destaque) · Vignette (overlay sobre imagens/cards)</p>
+      <p class="mt-3 text-xs text-ivory-200/50">Aurora Mono (títulos em destaque) · Vignette (overlay sobre imagens/cards)</p>
     </div>
   </div>
 </section>
@@ -624,7 +634,7 @@
 <!-- 4. UI COMPONENTS -->
 <!-- ============================================================ -->
 <section id="componentes" class="relative overflow-hidden bg-ivory-50 px-6 py-24 text-ink-950 md:px-14">
-  <div data-parallax data-speed="0.1" class="pointer-events-none absolute -right-32 bottom-0 h-[28rem] w-[28rem] rounded-full bg-gold-500/10 blur-[120px]"></div>
+  <div data-parallax data-speed="0.1" class="pointer-events-none absolute -right-32 bottom-0 h-[28rem] w-[28rem] rounded-full bg-white/10 blur-[120px]"></div>
 
   <div class="relative mb-16 grid gap-10 lg:grid-cols-12">
     <span data-reveal class="ks-mono lg:col-span-2 self-start rounded-full border border-ink-950/15 px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-ink-950/60">03 — Sistema</span>
@@ -636,20 +646,28 @@
     <h3 class="font-display text-2xl mb-6">Botões</h3>
     <div class="grid gap-6 rounded-3xl border border-ink-950/10 bg-white p-8 shadow-xl shadow-black/5 md:grid-cols-2">
       <div class="flex flex-wrap items-center gap-4">
-        <button class="ks-btn rounded-full bg-gold-500 px-7 py-3.5 text-sm font-semibold text-ink-950 shadow-lg shadow-gold-500/20 transition hover:bg-gold-400">Primário</button>
-        <button class="ks-btn rounded-full border border-ink-950/20 px-7 py-3.5 text-sm font-semibold transition hover:border-gold-600 hover:text-gold-600">Secundário</button>
-        <button class="ks-btn text-sm font-semibold underline decoration-gold-500 decoration-2 underline-offset-4 transition hover:text-gold-600">Terciário</button>
+        <button class="ks-btn rounded-full bg-ink-950 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-black/20 transition hover:shadow-xl hover:shadow-black/30">Primário</button>
+        <button class="ks-btn ks-btn-fill rounded-full border border-ink-950 px-7 py-3.5 text-sm font-semibold">Secundário</button>
+        <button class="ks-link-underline text-sm font-semibold text-ink-950 transition hover:text-ink-950/70">Terciário</button>
         <button class="ks-btn flex h-11 w-11 items-center justify-center rounded-full bg-ink-950 text-white transition hover:bg-ink-800" data-tooltip="Adicionar">
           <i data-lucide="plus" class="h-4 w-4"></i>
         </button>
         <button disabled class="cursor-not-allowed rounded-full bg-ink-950/10 px-7 py-3.5 text-sm font-semibold text-ink-950/30">Desabilitado</button>
       </div>
       <div class="ks-mono text-xs leading-relaxed text-ink-950/50">
-        <p class="mb-2 text-ink-950/70">Microinteração (todos os variantes, exceto disabled):</p>
-        <pre class="overflow-x-auto rounded-xl bg-ink-950 p-4 text-ivory-200"><code>el.addEventListener("mouseenter", () =>
-  gsap.to(el, { scale: 1.035, duration: .25, ease: "power2.out" }));
-el.addEventListener("mouseleave", () =>
-  gsap.to(el, { scale: 1, duration: .25, ease: "power2.out" }));</code></pre>
+        <p class="mb-2 text-ink-950/70">Camadas de microinteração (empilhadas, todos os variantes exceto disabled):</p>
+        <pre class="overflow-x-auto rounded-xl bg-ink-950 p-4 text-ivory-200"><code>/* 1 · escala, via GSAP — em qualquer button/a */
+el.addEventListener("mouseenter", () => gsap.to(el, { scale: 1.035, duration: .25 }));
+el.addEventListener("mouseleave", () => gsap.to(el, { scale: 1, duration: .25 }));
+
+/* 2 · brilho diagonal, CSS puro — .ks-btn */
+.ks-btn::after { left: -60%; transition: left .65s; /* → 130% no hover */ }
+
+/* 3 · preenchimento invertido, CSS puro — .ks-btn-fill (secundário) */
+.ks-btn-fill::before { transform: scaleX(0); /* → scaleX(1) no hover */ }
+
+/* 4 · sublinhado animado, CSS puro — .ks-link-underline (terciário) */
+.ks-link-underline::after { transform: scaleX(0); /* → scaleX(1) no hover */ }</code></pre>
       </div>
     </div>
   </div>
@@ -661,7 +679,7 @@ el.addEventListener("mouseleave", () =>
       <div class="space-y-5">
         <div>
           <label class="ks-mono mb-2 block text-[11px] uppercase tracking-[0.15em] text-ink-950/50">Padrão</label>
-          <input type="text" placeholder="Seu nome" class="w-full rounded-xl border border-ink-950/15 bg-ivory-50/60 px-4 py-3 text-sm outline-none transition focus:border-gold-500 focus:ring-4 focus:ring-gold-500/15">
+          <input type="text" placeholder="Seu nome" class="w-full rounded-xl border border-ink-950/15 bg-ivory-50/60 px-4 py-3 text-sm outline-none transition focus:border-ink-950 focus:ring-4 focus:ring-ink-950/10">
         </div>
         <div>
           <label class="ks-mono mb-2 block text-[11px] uppercase tracking-[0.15em] text-danger">Erro</label>
@@ -672,7 +690,7 @@ el.addEventListener("mouseleave", () =>
       <div class="space-y-5">
         <div>
           <label class="ks-mono mb-2 block text-[11px] uppercase tracking-[0.15em] text-ink-950/50">Textarea</label>
-          <textarea rows="3" placeholder="Sua mensagem" class="w-full rounded-xl border border-ink-950/15 bg-ivory-50/60 px-4 py-3 text-sm outline-none transition focus:border-gold-500 focus:ring-4 focus:ring-gold-500/15"></textarea>
+          <textarea rows="3" placeholder="Sua mensagem" class="w-full rounded-xl border border-ink-950/15 bg-ivory-50/60 px-4 py-3 text-sm outline-none transition focus:border-ink-950 focus:ring-4 focus:ring-ink-950/10"></textarea>
         </div>
         <div>
           <label class="ks-mono mb-2 block text-[11px] uppercase tracking-[0.15em] text-ink-950/30">Desabilitado</label>
@@ -687,7 +705,7 @@ el.addEventListener("mouseleave", () =>
     <h3 class="font-display text-2xl mb-6">Cards</h3>
     <div class="grid gap-6 md:grid-cols-3">
       <div class="group overflow-hidden rounded-2xl bg-ink-950 text-white shadow-xl shadow-black/10 transition hover:-translate-y-1 hover:shadow-2xl">
-        <div class="relative h-40 bg-gradient-to-br from-gold-700/40 via-ink-900 to-ink-950">
+        <div class="relative h-40 bg-gradient-to-br from-white/10 via-ink-900 to-ink-950">
           <div class="absolute inset-0 bg-gradient-to-t from-ink-950 to-transparent"></div>
         </div>
         <div class="p-6">
@@ -740,8 +758,8 @@ el.addEventListener("mouseleave", () =>
   <div data-reveal class="relative mb-20">
     <h3 class="font-display text-2xl mb-6">Badges</h3>
     <div class="flex flex-wrap gap-3 rounded-3xl border border-ink-950/10 bg-white p-8 shadow-xl shadow-black/5">
-      <span class="rounded-full bg-gold-500 px-4 py-1.5 text-xs font-semibold text-ink-950">Sólido</span>
-      <span class="rounded-full border border-gold-600 px-4 py-1.5 text-xs font-semibold text-gold-600">Outline</span>
+      <span class="rounded-full bg-ink-950 px-4 py-1.5 text-xs font-semibold text-white">Sólido</span>
+      <span class="rounded-full border border-ink-950 px-4 py-1.5 text-xs font-semibold text-ink-950">Outline</span>
       <span class="rounded-full bg-ink-950/5 px-4 py-1.5 text-xs font-semibold text-ink-950/60">Neutro</span>
       <span class="rounded-full bg-success/15 px-4 py-1.5 text-xs font-semibold text-success">Sucesso</span>
       <span class="rounded-full bg-warning/15 px-4 py-1.5 text-xs font-semibold text-warning">Atenção</span>
@@ -780,9 +798,9 @@ el.addEventListener("mouseleave", () =>
 
   <div class="relative grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6">
     <!-- data-reveal wraps each tile; icons render via lucide.createIcons() -->
-    <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-gold-500/40"><i data-lucide="sparkles" class="h-6 w-6 text-gold-400"></i><span class="ks-mono text-[10px] text-ivory-200/50">sparkles</span></div>
+    <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-white/25"><i data-lucide="sparkles" class="h-6 w-6 text-ivory-100/80"></i><span class="ks-mono text-[10px] text-ivory-200/50">sparkles</span></div>
     <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-white/25"><i data-lucide="leaf" class="h-6 w-6 text-ivory-100/80"></i><span class="ks-mono text-[10px] text-ivory-200/50">leaf</span></div>
-    <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-gold-500/40"><i data-lucide="gem" class="h-6 w-6 text-gold-400"></i><span class="ks-mono text-[10px] text-ivory-200/50">gem</span></div>
+    <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-white/25"><i data-lucide="gem" class="h-6 w-6 text-ivory-100/80"></i><span class="ks-mono text-[10px] text-ivory-200/50">gem</span></div>
     <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-white/25"><i data-lucide="shield-check" class="h-6 w-6 text-ivory-100/80"></i><span class="ks-mono text-[10px] text-ivory-200/50">shield-check</span></div>
     <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-white/25"><i data-lucide="truck" class="h-6 w-6 text-ivory-100/80"></i><span class="ks-mono text-[10px] text-ivory-200/50">truck</span></div>
     <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-white/25"><i data-lucide="heart" class="h-6 w-6 text-ivory-100/80"></i><span class="ks-mono text-[10px] text-ivory-200/50">heart</span></div>
@@ -799,7 +817,7 @@ el.addEventListener("mouseleave", () =>
 <!-- 6. ANIMATIONS -->
 <!-- ============================================================ -->
 <section id="animacoes" class="relative overflow-hidden bg-ivory-50 px-6 py-24 text-ink-950 md:px-14">
-  <div data-parallax data-speed="0.12" class="pointer-events-none absolute -left-40 top-40 h-[32rem] w-[32rem] rounded-full bg-gold-500/10 blur-[130px]"></div>
+  <div data-parallax data-speed="0.12" class="pointer-events-none absolute -left-40 top-40 h-[32rem] w-[32rem] rounded-full bg-white/10 blur-[130px]"></div>
 
   <div class="relative mb-16 grid gap-10 lg:grid-cols-12">
     <span data-reveal class="ks-mono lg:col-span-2 self-start rounded-full border border-ink-950/15 px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-ink-950/60">05 — Sistema</span>
@@ -842,7 +860,7 @@ gsap.to(items, { autoAlpha:1, y:0, scale:1, filter:"blur(0px)",
     </div>
 
     <div data-reveal class="rounded-3xl border border-ink-950/10 bg-white p-8 shadow-xl shadow-black/5">
-      <p class="ks-mono text-[11px] uppercase tracking-[0.2em] text-gold-600">Magnetic hover (botões e links)</p>
+      <p class="ks-mono text-[11px] uppercase tracking-[0.2em] text-ink-950/45">Magnetic hover (botões e links)</p>
       <p class="mt-3 text-sm leading-relaxed text-ink-950/70">Todo <code class="ks-mono text-xs">button</code> e <code class="ks-mono text-xs">a</code> ganha um leve aumento de escala ao passar o mouse — a assinatura tátil do sistema.</p>
       <pre class="ks-mono mt-4 overflow-x-auto rounded-xl bg-ink-950 p-4 text-xs text-ivory-200"><code>gsap.utils.toArray("button, a").forEach(el => {
   el.addEventListener("mouseenter", () =>
@@ -877,7 +895,7 @@ gsap.to(items, { autoAlpha:1, y:0, scale:1, filter:"blur(0px)",
     <p class="ks-mono text-[11px] uppercase tracking-[0.2em] text-ink-950/45">Exemplo de modal</p>
     <h3 class="font-display mt-2 text-3xl">Fique por dentro</h3>
     <p class="mt-3 text-sm leading-relaxed text-ink-950/60">Entrada em fade + scale via GSAP, backdrop com blur — o mesmo padrão usado em qualquer diálogo do sistema.</p>
-    <button class="ks-btn mt-6 w-full rounded-full bg-gold-500 px-6 py-3.5 text-sm font-semibold text-ink-950 transition hover:bg-gold-400">Entendi</button>
+    <button class="ks-btn mt-6 w-full rounded-full bg-ink-950 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-ink-800">Entendi</button>
   </div>
 </div>
 
@@ -1033,7 +1051,7 @@ gsap.to(items, { autoAlpha:1, y:0, scale:1, filter:"blur(0px)",
 
   ScrollTrigger.refresh();
 
-  /* Floating gold particles inside the hero */
+  /* Floating white particles inside the hero */
   (function () {
     const wrap = document.getElementById("hero-particles");
     const count = 24;

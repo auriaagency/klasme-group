@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Florasis — Chegando ao Brasil</title>
+<meta name="description" content="Florasis chega ao Brasil pela Klasmē Group. A beleza inspirada na natureza e na cultura oriental.">
+
+<script>
+  document.documentElement.classList.add('js');
+  if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }
+  window.scrollTo(0, 0);
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink-950: #050505;
+    --ink-900: #0a0a0a;
+    --ivory-50: #f7f4ee;
+    --ivory-200: #e9e3d8;
+    --page-margin: 20px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body { height: 100%; }
+
+  body {
+    background: var(--ink-950);
+    color: var(--ivory-50);
+    font-family: 'Inter', sans-serif;
+    cursor: default;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: rgba(247, 244, 238, .25); color: #fff; }
+
+  .font-display { font-family: 'Cinzel', serif; }
+  .font-accent  { font-family: 'Cormorant Garamond', serif; }
+  .font-mono    { font-family: 'JetBrains Mono', monospace; }
+
+  /* Reveal targets start invisible only once JS confirms it can animate them back in */
+  html.js [data-reveal] { opacity: 0; }
+
+  a, button { font-family: inherit; }
+
+  /* ============================================================ */
+  /* HERO                                                          */
+  /* ============================================================ */
+
+  .hero {
+    position: relative;
+    height: 100svh;
+    min-height: 560px;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--ink-950);
+  }
+
+  /* ---- media layer -------------------------------------------- */
+
+  .hero-media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 90% at 20% 15%, #171512 0%, transparent 60%),
+      linear-gradient(160deg, #14110d 0%, #050505 55%, #0a0806 100%);
+  }
+
+  .hero-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 62% 40%;
+    transform: scale(1.08);
+    filter: saturate(1.02) contrast(1.03);
+    opacity: 0;
+  }
+
+  @media (max-width: 767px) {
+    .hero-video { object-position: 68% 32%; }
+  }
+
+  .hero-vignette {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+      linear-gradient(0deg, rgba(5,5,5,.97) 0%, rgba(5,5,5,.86) 22%, rgba(5,5,5,.4) 46%, rgba(5,5,5,.08) 64%, rgba(5,5,5,0) 78%),
+      linear-gradient(100deg, rgba(5,5,5,.92) 0%, rgba(5,5,5,.62) 32%, rgba(5,5,5,.18) 55%, rgba(5,5,5,0) 74%),
+      linear-gradient(180deg, rgba(5,5,5,.65) 0%, rgba(5,5,5,0) 22%, rgba(5,5,5,0) 74%, rgba(5,5,5,.55) 100%),
+      rgba(5, 5, 5, .16);
+  }
+
+  .hero-noise {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: .05;
+    mix-blend-mode: overlay;
+    background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="n"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23n)"/%3E%3C/svg%3E');
+  }
+
+  /* ---- editorial frame ------------------------------------------ */
+
+  .hero-frame {
+    position: absolute;
+    inset: 14px;
+    z-index: 5;
+    pointer-events: none;
+    border: 1px solid rgba(247, 244, 238, .16);
+  }
+
+  @media (min-width: 768px) {
+    .hero-frame { inset: 22px; }
+  }
+
+  .hero-frame::before,
+  .hero-frame::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+  }
+  .hero-frame::before { top: -1px; left: -1px; border-top: 1px solid rgba(247,244,238,.55); border-left: 1px solid rgba(247,244,238,.55); }
+  .hero-frame::after  { bottom: -1px; right: -1px; border-bottom: 1px solid rgba(247,244,238,.55); border-right: 1px solid rgba(247,244,238,.55); }
+
+  .hero-side-label {
+    position: absolute;
+    right: 30px;
+    top: 50%;
+    z-index: 6;
+    display: none;
+    writing-mode: vertical-rl;
+    transform: translateY(-50%) rotate(180deg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .32em;
+    text-transform: uppercase;
+    color: rgba(247, 244, 238, .4);
+  }
+
+  @media (min-width: 900px) {
+    .hero-side-label { display: block; }
+  }
+
+  /* ---- nav -------------------------------------------------------- */
+
+  .hero-nav {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 26px var(--page-margin) 0;
+  }
+
+  @media (min-width: 768px) {
+    .hero-nav { padding: 40px 56px 0; }
+  }
+
+  .hero-brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .hero-brand-mark {
+    font-size: 13px;
+    letter-spacing: .22em;
+    font-weight: 500;
+  }
+
+  .hero-brand-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: rgba(247, 244, 238, .45);
+  }
+
+  .hero-market {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: rgba(247, 244, 238, .04);
+    border: 1px solid rgba(247, 244, 238, .12);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: rgba(247, 244, 238, .75);
+  }
+
+  .hero-market-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--ivory-50);
+    animation: florasis-pulse 2.6s ease-in-out infinite;
+  }
+
+  @keyframes florasis-pulse {
+    0%, 100% { opacity: .5; transform: scale(1); }
+    50%      { opacity: 1;  transform: scale(1.25); }
+  }
+
+  /* ---- content ------------------------------------------------ */
+
+  .hero-content {
+    position: relative;
+    z-index: 10;
+    height: calc(100% - 84px);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 var(--page-margin) 120px;
+    max-width: 46rem;
+  }
+
+  @media (min-width: 768px) {
+    .hero-content { padding: 0 56px 96px; height: calc(100% - 120px); }
+  }
+
+  .hero-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    color: rgba(247, 244, 238, .55);
+    margin-bottom: 18px;
+  }
+
+  html.js .hero-wordmark { opacity: 0; }
+
+  .hero-wordmark {
+    font-family: 'Cinzel', serif;
+    font-weight: 500;
+    font-size: clamp(3rem, 11vw, 8.5rem);
+    line-height: .92;
+    letter-spacing: .01em;
+    color: var(--ivory-50);
+    text-shadow: 0 6px 40px rgba(0,0,0,.45);
+    display: flex;
+    overflow: hidden;
+  }
+
+  .hero-wordmark .letter {
+    display: inline-block;
+    will-change: transform;
+  }
+
+  .hero-subheading {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.15rem, 2.4vw, 1.65rem);
+    line-height: 1.5;
+    color: rgba(247, 244, 238, .88);
+    text-shadow: 0 2px 20px rgba(0,0,0,.4);
+    max-width: 30rem;
+    margin-top: 22px;
+  }
+
+  .hero-tagline {
+    margin-top: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: rgba(247, 244, 238, .62);
+    text-shadow: 0 1px 12px rgba(0,0,0,.4);
+  }
+
+  .hero-shine {
+    background: linear-gradient(115deg, #8a8a8a, #ffffff 45%, #d8d8d8 65%, #8a8a8a);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .hero-cta {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 40px;
+    padding: 15px 28px;
+    border-radius: 999px;
+    border: 1px solid rgba(247, 244, 238, .35);
+    background: transparent;
+    color: var(--ivory-50);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .04em;
+    text-decoration: none;
+    transition: border-color .35s ease, background .35s ease;
+  }
+
+  .hero-cta:hover { border-color: rgba(247, 244, 238, .7); background: rgba(247, 244, 238, .06); }
+
+  .hero-cta::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -60%;
+    width: 40%; height: 100%;
+    background: linear-gradient(115deg, transparent, rgba(255,255,255,.35), transparent);
+    transform: skewX(-20deg);
+    transition: left .65s cubic-bezier(.4,0,.2,1);
+    pointer-events: none;
+  }
+  .hero-cta:hover::after { left: 130%; }
+
+  .hero-cta svg {
+    width: 15px;
+    height: 15px;
+    transition: transform .35s cubic-bezier(.4,0,.2,1);
+  }
+  .hero-cta:hover svg { transform: translate(2px, -2px); }
+
+  :focus-visible { outline: 1px solid rgba(247, 244, 238, .8); outline-offset: 4px; }
+
+  /* ---- scroll cue ------------------------------------------------ */
+
+  .hero-scroll-cue {
+    position: absolute;
+    left: 50%;
+    bottom: 30px;
+    z-index: 10;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: rgba(247, 244, 238, .4);
+  }
+
+  .hero-scroll-cue span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .32em;
+    text-transform: uppercase;
+  }
+
+  .hero-scroll-line {
+    width: 1px;
+    height: 26px;
+    background: linear-gradient(180deg, rgba(247,244,238,.6), transparent);
+    overflow: hidden;
+  }
+
+  .hero-scroll-line::after {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 40%;
+    background: var(--ivory-50);
+    animation: florasis-scroll-drip 2.2s ease-in-out infinite;
+  }
+
+  @keyframes florasis-scroll-drip {
+    0%   { transform: translateY(-100%); }
+    60%  { transform: translateY(220%); }
+    100% { transform: translateY(220%); }
+  }
+
+  /* ---- particles ------------------------------------------------- */
+
+  .hero-particles {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .hero-particle {
+    position: absolute;
+    bottom: -5%;
+    width: 2px;
+    height: 2px;
+    border-radius: 999px;
+    background: #ffffff;
+    box-shadow: 0 0 6px rgba(255,255,255,.6);
+    animation: florasis-rise linear infinite;
+  }
+
+  @keyframes florasis-rise {
+    0%   { transform: translateY(0) translateX(0); opacity: 0; }
+    12%  { opacity: .55; }
+    88%  { opacity: .25; }
+    100% { transform: translateY(-100%) translateX(var(--drift, 16px)); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-market-dot,
+    .hero-scroll-line::after,
+    .hero-particle { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<section id="hero-pin" class="hero">
+
+  <div class="hero-media">
+    <video class="hero-video" id="heroVideo" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+      <source src="assets/videos/hero-florasis.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <div class="hero-vignette"></div>
+  <div class="hero-noise"></div>
+  <div class="hero-frame" data-reveal></div>
+  <span class="hero-side-label" data-reveal>Ed. 01 — Lançamento Brasil</span>
+
+  <header class="hero-nav">
+    <div class="hero-brand" data-reveal>
+      <span class="font-display hero-brand-mark">KLASMĒ</span>
+      <span class="hero-brand-sub">Group</span>
+    </div>
+    <div class="hero-market" data-reveal>
+      <span class="hero-market-dot"></span>
+      Florasis × Brasil
+    </div>
+  </header>
+
+  <div class="hero-content">
+    <p class="hero-eyebrow" data-reveal>Klasmē Group apresenta</p>
+
+    <h1 class="hero-wordmark" aria-label="Florasis" data-hero-wordmark>
+      <span class="letter" aria-hidden="true">F</span><span class="letter" aria-hidden="true">l</span><span class="letter" aria-hidden="true">o</span><span class="letter" aria-hidden="true">r</span><span class="letter" aria-hidden="true">a</span><span class="letter" aria-hidden="true">s</span><span class="letter" aria-hidden="true">i</span><span class="letter" aria-hidden="true">s</span>
+    </h1>
+
+    <p class="hero-subheading" data-reveal>
+      A beleza inspirada na natureza e na cultura oriental.
+    </p>
+
+    <p class="hero-tagline" data-reveal>Agora no <span class="hero-shine">Brasil</span></p>
+
+    <a href="#" class="hero-cta" data-reveal id="heroCta">
+      Explorar a chegada
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+    </a>
+  </div>
+
+  <div class="hero-scroll-cue" data-reveal>
+    <span>Rolar</span>
+    <div class="hero-scroll-line"></div>
+  </div>
+
+  <div class="hero-particles" id="heroParticles"></div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }
+  window.scrollTo(0, 0);
+
+  /* -------------------------------------------------------------- */
+  /* Particles — sparse, ambient                                     */
+  /* -------------------------------------------------------------- */
+  (function seedParticles() {
+    if (reduceMotion) return;
+    const wrap = document.getElementById('heroParticles');
+    const count = 14;
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('span');
+      p.className = 'hero-particle';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.setProperty('--drift', (Math.random() * 50 - 25) + 'px');
+      p.style.animationDuration = (12 + Math.random() * 14) + 's';
+      p.style.animationDelay = (Math.random() * 16) + 's';
+      wrap.appendChild(p);
+    }
+  })();
+
+  /* -------------------------------------------------------------- */
+  /* Entrance timeline                                                */
+  /* -------------------------------------------------------------- */
+  const video = document.getElementById('heroVideo');
+  const letters = gsap.utils.toArray('.hero-wordmark .letter');
+
+  function playEntrance() {
+    gsap.set('[data-reveal]', { autoAlpha: 0, y: 22, filter: 'blur(8px)' });
+    gsap.set('.hero-wordmark', { opacity: 1 });
+    gsap.set(letters, { yPercent: 115 });
+    gsap.set(video, { opacity: 0, scale: 1.14 });
+    gsap.set('.hero-media', { clipPath: 'inset(30% 30% 30% 30%)' });
+
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+    tl.to('.hero-media', { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.5, ease: 'power4.inOut' }, .1)
+      .to('.hero-frame', { autoAlpha: 1, duration: .8, ease: 'power2.out' }, .3)
+      .to(video, { opacity: 1, duration: 1.4, ease: 'power2.out' }, .25)
+      .to(video, { scale: 1, duration: 2.6, ease: 'power3.out' }, .25)
+      .to('.hero-brand, .hero-market, .hero-side-label', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .9, stagger: .08 }, .9)
+      .to('.hero-eyebrow', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .8 }, 1.05)
+      .to(letters, { yPercent: 0, duration: 1.1, stagger: .045, ease: 'power4.out' }, 1.2)
+      .to('.hero-subheading', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .9 }, 1.75)
+      .to('.hero-tagline', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .8 }, 1.95)
+      .to('.hero-cta', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .8 }, 2.1)
+      .to('.hero-scroll-cue', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .8 }, 2.35)
+      .call(buildScrollNarrative);
+  }
+
+  /* -------------------------------------------------------------- */
+  /* Scroll-linked narrative — the hero pins briefly and settles      */
+  /* into a quieter closing frame instead of unpinning abruptly.      */
+  /* -------------------------------------------------------------- */
+  let heroPinTrigger = null;
+
+  function buildScrollNarrative() {
+    if (reduceMotion) return;
+
+    ScrollTrigger.matchMedia({
+      '(min-width: 768px)': createPin.bind(null, '55%'),
+      '(max-width: 767px)': createPin.bind(null, '32%')
+    });
+  }
+
+  function createPin(distance) {
+    const crossfade = gsap.timeline({ paused: true })
+      .to(video, { scale: 1.1, ease: 'none' }, 0)
+      .to('.hero-vignette', { autoAlpha: 1.15, ease: 'none' }, 0)
+      .to('.hero-brand, .hero-market, .hero-eyebrow, .hero-cta, .hero-scroll-cue', { autoAlpha: 0, y: -14, ease: 'none' }, 0)
+      .to('.hero-wordmark, .hero-subheading, .hero-tagline', { yPercent: -6, ease: 'none' }, 0);
+
+    heroPinTrigger = ScrollTrigger.create({
+      trigger: '#hero-pin',
+      start: 'top top',
+      end: '+=' + distance,
+      pin: true,
+      anticipatePin: 1,
+      onUpdate(self) { crossfade.progress(self.progress); }
+    });
+  }
+
+  /* -------------------------------------------------------------- */
+  /* CTA — smooth-scrolls through the pinned narrative                */
+  /* -------------------------------------------------------------- */
+  document.getElementById('heroCta').addEventListener('click', (e) => {
+    e.preventDefault();
+    const targetY = heroPinTrigger ? heroPinTrigger.end : document.body.scrollHeight;
+    window.scrollTo({ top: targetY, behavior: reduceMotion ? 'auto' : 'smooth' });
+  });
+
+  /* -------------------------------------------------------------- */
+  /* Magnetic hover — CTA only, the system's signature tactile cue    */
+  /* -------------------------------------------------------------- */
+  if (!reduceMotion) {
+    const cta = document.getElementById('heroCta');
+    cta.addEventListener('mouseenter', () => gsap.to(cta, { scale: 1.035, duration: .25, ease: 'power2.out' }));
+    cta.addEventListener('mouseleave', () => gsap.to(cta, { scale: 1, duration: .25, ease: 'power2.out' }));
+  }
+
+  window.addEventListener('load', () => {
+    window.scrollTo(0, 0);
+    if (reduceMotion) {
+      gsap.set('[data-reveal]', { autoAlpha: 1, y: 0, filter: 'blur(0px)' });
+      gsap.set('.hero-wordmark', { opacity: 1 });
+      gsap.set(letters, { yPercent: 0 });
+      gsap.set(video, { opacity: 1, scale: 1 });
+    } else {
+      playEntrance();
+    }
+    ScrollTrigger.refresh();
+  });
+</script>
+</body>
+</html>
