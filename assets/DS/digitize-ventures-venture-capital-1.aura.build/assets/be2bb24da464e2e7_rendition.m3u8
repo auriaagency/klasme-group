@@ -1,0 +1,10 @@
+#EXTM3U
+#EXT-X-VERSION:7
+#EXT-X-TARGETDURATION:4
+#EXT-X-MAP:URI="https://chunk-oci-us-ashburn-1-vop1.fastly.mux.com/v1/chunk/KSlH01lrADe4G3Q62drUjA8Lnpi4d8nS2yQO01JmzIwbbalx02UwE6k1LoX49EaDEdn1ff7729BSRcswHC3zAe0100HJuGJYQ4d014TRh8OdSv00aI/18446744073709551615.m4s?skid=default&signature=NmE4ZjQ1YzBfMjNmY2Y0YjEwODNkOGNjOWJiNDBiNzE4MjI4YzE4NzQ1YjhkZDY4NDhlNGZkYTliNzk1NTE3NzliMzkxZmQ5Ng==&zone=2"
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXTINF:4,
+https://chunk-oci-us-ashburn-1-vop1.fastly.mux.com/v1/chunk/cFIGreauEfJRCRD4p8T1WpuTklanXSlYAQ8Z00MzkX7Nf9Y2HY384vvE7Zk4XCzCpbOhxRWrQbz3NFLgmv009tEbeTuZTuJ00tU79z9UWYL4mg/0.m4s?skid=default&signature=NmE4ZjQ1YzBfZjk1ZGViZDMzMzdjNWNhNjBjODlmMTQzMjc0MTZhZmM0MjZlYWUwOTNmY2Q0YzdmMzhhODRiN2JjOTAwNjFiYg==&zone=2
+#EXTINF:1.25,
+https://chunk-oci-us-ashburn-1-vop1.fastly.mux.com/v1/chunk/1Kh58YrZArBxPCHegaiesGOz9gKB3q2J3YYzvf2W74dYxzBTRzCbeoYVwgsBxvcTVlypz4KipO7SIQWHjuHUljMzjG2GbykdYrhhq7sHQTw/1.m4s?skid=default&signature=NmE4ZjQ1YzBfOTkyMGExNjk2NzRlMDA1MTk5NWY2OGY5M2VjOTc3NDlkMjQzYjkyYWZjMmVmYzhlNGRlZWNhYThmNGI4ZGIwOA==&zone=2
+#EXT-X-ENDLIST

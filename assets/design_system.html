@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klasmē System — Design System</title>
+
+<script>
+  /* Prevents a flash of visible content before GSAP hides the reveal
+     targets, and forces every load/reload to start at the very top —
+     ignoring the browser's scroll memory and any #anchor in the URL. */
+  document.documentElement.classList.add('js');
+  if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }
+  window.scrollTo(0, 0);
+</script>
+
+<link rel="icon" type="image/png" href="imgs/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          ink: { 950: '#050505', 900: '#0a0a0a', 800: '#121212', 700: '#1c1a17' },
+          ivory: { 50: '#f7f4ee', 200: '#e9e3d8' },
+          gold: { 400: '#e6cf9e', 500: '#c9a15a', 600: '#a67c3d', 700: '#7c5b28' },
+          success: { DEFAULT: '#8fae7c' },
+          warning: { DEFAULT: '#d9b06a' },
+          danger:  { DEFAULT: '#d98a8a' }
+        },
+        fontFamily: {
+          display: ['Cinzel', 'serif'],
+          accent:  ['Cormorant Garamond', 'serif'],
+          sans:    ['Inter', 'sans-serif'],
+          mono:    ['JetBrains Mono', 'monospace']
+        }
+      }
+    }
+  };
+</script>
+
+<style>
+  :root {
+    --ink-950: #050505;
+    --ink-900: #0a0a0a;
+    --gold-500: #c9a15a;
+    --gold-400: #e6cf9e;
+  }
+
+  * { -webkit-tap-highlight-color: transparent; }
+
+  /* Hide reveal targets before GSAP takes over — only while JS is
+     available (see the early script in <head>), so there is zero flash
+     of visible content before the entrance animation, and no fallback
+     content is ever permanently hidden if a script fails to load. */
+  html.js [data-reveal],
+  html.js [data-hero-word],
+  html.js [data-product-hero] {
+    opacity: 0;
+  }
+
+  body {
+    background: var(--ink-950);
+    cursor: default;
+  }
+
+  ::selection { background: rgba(201, 161, 90, .35); color: #fff; }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #050505; }
+  ::-webkit-scrollbar-thumb { background: #262626; border-radius: 999px; border: 2px solid #050505; }
+  ::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
+
+  /* Noise / dither overlay — same recipe used across the reference systems */
+  .ks-noise {
+    background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="n"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23n)"/%3E%3C/svg%3E');
+  }
+
+  /* Glass / frosted surface */
+  .ks-glass {
+    background: rgba(247, 244, 238, 0.04);
+    border: 1px solid rgba(247, 244, 238, 0.1);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  /* Slow ambient pulse — used on live/status dots and glow orbs */
+  @keyframes ks-pulse-glow {
+    0%, 100% { opacity: .45; transform: scale(1); }
+    50%      { opacity: 1;   transform: scale(1.15); }
+  }
+  .ks-pulse { animation: ks-pulse-glow 2.6s ease-in-out infinite; }
+
+  /* Ambient background drift — keeps the hero alive even before scroll */
+  @keyframes ks-drift-a {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: .55; }
+    50%      { transform: translate(4%, -6%) scale(1.15); opacity: .85; }
+  }
+  @keyframes ks-drift-b {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: .4; }
+    50%      { transform: translate(-6%, 5%) scale(1.1); opacity: .7; }
+  }
+  @keyframes ks-drift-c {
+    0%, 100%  { transform: rotate(0deg) scale(1); }
+    50%       { transform: rotate(180deg) scale(1.08); }
+  }
+  .ks-drift-a { animation: ks-drift-a 16s ease-in-out infinite; }
+  .ks-drift-b { animation: ks-drift-b 20s ease-in-out infinite; }
+  .ks-drift-c { animation: ks-drift-c 46s linear infinite; }
+
+  /* Faint rotating conic sheen behind the hero — a slow, elegant light sweep */
+  .ks-aurora {
+    background: conic-gradient(from 0deg at 50% 45%,
+      transparent 0deg, rgba(201,161,90,.10) 60deg, transparent 130deg,
+      rgba(255,255,255,.05) 210deg, transparent 280deg, transparent 360deg);
+  }
+
+  /* Infinite marquee — pure CSS, pauses on hover */
+  @keyframes ks-marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  .ks-marquee-track {
+    animation: ks-marquee 32s linear infinite;
+  }
+  .ks-marquee:hover .ks-marquee-track { animation-play-state: paused; }
+
+  /* Floating gold particles, reused from the launch page */
+  @keyframes ks-rise {
+    0%   { transform: translateY(0) translateX(0); opacity: 0; }
+    10%  { opacity: .7; }
+    90%  { opacity: .35; }
+    100% { transform: translateY(-105%) translateX(var(--drift, 20px)); opacity: 0; }
+  }
+  .ks-particle {
+    position: absolute; bottom: -5%; width: 3px; height: 3px; border-radius: 999px;
+    background: var(--gold-400); box-shadow: 0 0 6px rgba(230,207,158,.8);
+    animation: ks-rise linear infinite;
+  }
+
+  /* Gold gradient text */
+  .ks-gold-text {
+    background: linear-gradient(115deg, #7c5b28, #e6cf9e 45%, #c9a15a 65%, #7c5b28);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  /* Section grid-line overlay, straight from the bloom-premium hero recipe */
+  .ks-grid-overlay {
+    background-image:
+      linear-gradient(90deg, rgba(247,244,238,.06) 1px, transparent 1px);
+    background-size: 33.33% 100%;
+  }
+
+  code, .ks-mono { font-family: 'JetBrains Mono', monospace; }
+
+  [data-tooltip] { position: relative; }
+  [data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translate(-50%, 4px);
+    white-space: nowrap; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .04em;
+    background: #f7f4ee; color: #050505; padding: 6px 10px; border-radius: 6px;
+    opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; z-index: 30;
+  }
+  [data-tooltip]:hover::after { opacity: 1; transform: translate(-50%, 0); }
+
+  .ks-modal-backdrop { background: rgba(5,5,5,.72); backdrop-filter: blur(6px); }
+</style>
+</head>
+<body class="bg-ink-950 text-ivory-50 antialiased font-sans selection:bg-gold-500/30">
+
+<!-- ============================================================ -->
+<!-- 1. HERO — live demonstration of the system's signature motion -->
+<!-- ============================================================ -->
+<section id="hero-pin" class="relative min-h-[60vh] overflow-hidden bg-ink-950 text-ivory-50 md:min-h-screen" style="isolation:isolate;">
+
+  <!-- Slow rotating conic sheen — the base layer of ambient movement -->
+  <div class="ks-aurora ks-drift-c pointer-events-none absolute -inset-[20%] opacity-60"></div>
+
+  <!-- Ambient gradient orbs — drifting continuously, plus scroll parallax on top -->
+  <div data-parallax data-speed="-0.16" class="pointer-events-none absolute inset-0 opacity-70">
+    <div class="ks-drift-a absolute -left-32 bottom-0 h-[28rem] w-[28rem] rounded-full bg-white/[0.07] blur-[110px]"></div>
+    <div class="ks-drift-b absolute right-0 top-16 h-[24rem] w-[24rem] rounded-full bg-gold-500/10 blur-[110px]"></div>
+  </div>
+  <div class="pointer-events-none absolute inset-0 opacity-[0.05] ks-noise"></div>
+  <div class="pointer-events-none absolute inset-x-6 top-0 bottom-0 hidden md:grid grid-cols-3 border-x border-white/10 md:inset-x-14 ks-grid-overlay opacity-40"></div>
+  <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink-950 via-transparent to-ink-950/40"></div>
+
+  <!-- Floating nav -->
+  <header class="relative z-30 flex items-center justify-between px-6 py-7 md:px-14">
+    <a href="#hero" data-reveal class="flex items-center gap-3">
+      <span class="font-display text-lg tracking-[0.18em]">KLASMĒ</span>
+      <span class="ks-mono text-[10px] tracking-[0.3em] text-ivory-200/50 uppercase">System</span>
+    </a>
+
+    <nav data-reveal class="ks-glass hidden items-center rounded-full p-1 text-sm font-medium sm:flex">
+      <a href="#tipografia" class="rounded-full px-4 py-2.5 text-ivory-200 transition hover:bg-white/5 hover:text-white">Tipografia</a>
+      <a href="#cores" class="rounded-full px-4 py-2.5 text-ivory-200 transition hover:bg-white/5 hover:text-white">Cores</a>
+      <a href="#componentes" class="rounded-full px-4 py-2.5 text-ivory-200 transition hover:bg-white/5 hover:text-white">Componentes</a>
+      <a href="#icones" class="rounded-full px-4 py-2.5 text-ivory-200 transition hover:bg-white/5 hover:text-white">Ícones</a>
+      <a href="#animacoes" class="rounded-full bg-white px-4 py-2.5 text-ink-950 transition hover:bg-ivory-200">Animações</a>
+    </nav>
+  </header>
+
+  <!-- Giant background wordmark — the real logo, sits directly behind the product.
+       Sized down a lot on small screens: at the desktop size, it would be
+       wider than most phones and collide with the product image below. -->
+  <img data-hero-word src="imgs/KLASME-GROUP-LOGO.png" alt=""
+       class="pointer-events-none absolute top-[42%] left-1/2 z-0 w-[13rem] max-w-none -translate-x-1/2 -translate-y-1/2 select-none opacity-90 sm:w-[16rem] md:top-1/2 md:w-[34rem] lg:w-[42rem] xl:w-[48rem]">
+  <h1 class="sr-only">Klasmē Group</h1>
+
+  <div id="hero" class="relative z-10 mx-auto flex min-h-[calc(60vh-6rem)] max-w-5xl items-center justify-center px-6 pb-20 pt-8 md:min-h-[calc(100vh-6rem)] md:px-14">
+
+    <!-- Floating product image, centered and overlapping the wordmark — mirrors the bloom-premium hero exactly.
+         The bounding box of the artwork is centered in its canvas, but the
+         VISUAL weight isn't: the dangling chain/charm is thin and sparse,
+         while the lipstick body is solid and dense, so the pixel-mass
+         centroid sits ~3% to the right of the box center. -translate-x-1/2
+         centers the box; nudging to -53% centers the actual visual mass
+         instead, which is what reads as "aligned" to the eye. -->
+    <img data-product-hero data-float
+         src="imgs/batom-sem-fundo.svg"
+         alt="Produto em destaque"
+         class="absolute left-1/2 top-14 z-10 h-[13rem] w-auto -translate-x-[53%] drop-shadow-[0_40px_55px_rgba(0,0,0,0.65)] sm:h-[15rem] md:top-14 md:h-[24rem] lg:h-[28rem]">
+
+    <!-- Floating glass badge, mirrors bloom-premium's product tag -->
+    <div data-reveal data-float data-hero-fade class="ks-glass absolute right-6 top-1/3 z-20 hidden max-w-[13rem] flex-col gap-1 rounded-2xl px-5 py-4 shadow-2xl shadow-black/40 md:flex lg:right-16">
+      <span class="ks-mono text-[10px] uppercase tracking-[0.2em] text-ivory-200/60">Curadoria ativa</span>
+      <span class="text-lg font-semibold text-white">5 marcas</span>
+      <span class="text-xs text-ivory-200/50">Lançamento 04.09.2026</span>
+    </div>
+
+    <!-- Floating index/version panel, mirrors bloom-premium's price tag + arrow button -->
+    <div data-reveal data-hero-fade class="absolute bottom-8 left-6 z-20 flex items-center gap-4 md:bottom-24 md:left-16">
+      <a href="#componentes" class="ks-btn flex h-16 w-16 items-center justify-center rounded-lg bg-white text-ink-950 shadow-2xl shadow-black/40 transition hover:scale-105">
+        <i data-lucide="arrow-up-right" class="h-7 w-7"></i>
+      </a>
+      <div>
+        <p class="text-2xl font-semibold tracking-tight text-white">v1.0</p>
+        <p class="ks-mono text-xs font-medium uppercase tracking-[0.15em] text-ivory-200/60">Ago 2026</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll cue — hints at the pinned reveal, not a generic "scroll for more".
+       Pushed up clear of the index panel on mobile only (md: restores the
+       original desktop value untouched) — the shorter mobile section put
+       both anchors near the same bottom edge, crowding them together. -->
+  <div data-reveal data-hero-fade class="absolute bottom-24 left-1/2 z-20 -translate-x-1/2 flex flex-col items-center gap-2 text-ivory-200/40 md:bottom-8">
+    <span class="ks-mono text-[10px] uppercase tracking-[0.3em]">Rolar</span>
+    <i data-lucide="chevron-down" class="h-4 w-4 animate-bounce"></i>
+  </div>
+
+  <!-- Floating gold particles, sparse -->
+  <div class="pointer-events-none absolute inset-0 z-10 overflow-hidden" id="hero-particles"></div>
+</section>
+
+<!-- Marquee strip -->
+<div class="ks-marquee relative overflow-hidden border-y border-white/10 bg-ink-900 py-5">
+  <div class="ks-marquee-track flex w-max items-center gap-10 whitespace-nowrap">
+    <span class="ks-mono text-xs uppercase tracking-[0.35em] text-white/35">
+      C-Beauty &nbsp;·&nbsp; Skincare &nbsp;·&nbsp; Color Cosmetics &nbsp;·&nbsp; Vegano &nbsp;·&nbsp; Performance diária &nbsp;·&nbsp; Herança oriental &nbsp;·&nbsp; Curadoria Klasmē &nbsp;·&nbsp;
+    </span>
+    <span class="ks-mono text-xs uppercase tracking-[0.35em] text-white/35" aria-hidden="true">
+      C-Beauty &nbsp;·&nbsp; Skincare &nbsp;·&nbsp; Color Cosmetics &nbsp;·&nbsp; Vegano &nbsp;·&nbsp; Performance diária &nbsp;·&nbsp; Herança oriental &nbsp;·&nbsp; Curadoria Klasmē &nbsp;·&nbsp;
+    </span>
+  </div>
+</div>
+
+<!-- Intro strip — the explanatory copy, kept out of the hero's graphic composition -->
+<section class="relative overflow-hidden bg-ink-950 px-6 py-24 text-center text-ivory-50 md:px-14">
+  <div class="pointer-events-none absolute inset-0 opacity-[0.04] ks-noise"></div>
+  <div class="relative mx-auto max-w-2xl">
+    <h2 data-reveal class="font-display text-4xl leading-[1.1] tracking-tight md:text-6xl">
+      Sistema de
+      <span class="ks-gold-text italic font-accent">Design</span>
+    </h2>
+
+    <p data-reveal class="mt-6 font-accent text-xl italic leading-relaxed text-ivory-200/80 md:text-2xl">
+      A fundação visual do ecossistema C-beauty da Klasmē.
+    </p>
+
+    <p data-reveal class="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-ivory-200/50">
+      Tipografia, cor, componentes e movimento — documentados e prontos para
+      construir cada página de marca, com o mesmo rigor e a mesma sofisticação.
+    </p>
+
+    <div data-reveal class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+      <a href="#componentes" class="ks-btn group inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-sm font-semibold text-ink-950 shadow-2xl shadow-black/30 transition hover:bg-ivory-200">
+        Explorar componentes
+        <i data-lucide="arrow-up-right" class="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"></i>
+      </a>
+      <a href="#tipografia" class="ks-btn inline-flex items-center gap-2 rounded-full border border-white/15 px-8 py-4 text-sm font-semibold text-ivory-50 transition hover:border-white/40 hover:bg-white/5">
+        Ver tipografia
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 2. TYPOGRAPHY -->
+<!-- ============================================================ -->
+<section id="tipografia" class="relative overflow-hidden bg-ivory-50 px-6 py-24 text-ink-950 md:px-14">
+  <div data-parallax data-speed="0.1" class="pointer-events-none absolute -right-40 top-20 h-[30rem] w-[30rem] rounded-full bg-gold-500/10 blur-[120px]"></div>
+
+  <div class="relative mb-16 grid gap-10 lg:grid-cols-12">
+    <span data-reveal class="ks-mono lg:col-span-2 self-start rounded-full border border-ink-950/15 px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-ink-950/60">01 — Sistema</span>
+    <h2 data-reveal class="font-display text-6xl leading-none tracking-tight lg:col-span-10 lg:text-8xl">Tipografia</h2>
+  </div>
+
+  <!-- Font loading strategy -->
+  <div data-reveal class="relative mb-16 grid gap-6 rounded-3xl border border-ink-950/10 bg-white p-8 shadow-xl shadow-black/5 md:grid-cols-3 md:p-10">
+    <div>
+      <p class="ks-mono text-[11px] uppercase tracking-[0.2em] text-ink-950/45">Carregamento</p>
+      <p class="mt-3 text-sm leading-relaxed text-ink-950/70">
+        Google Fonts via CDN, com <code class="ks-mono text-xs">rel="preconnect"</code> para
+        <code class="ks-mono text-xs">fonts.googleapis.com</code> e
+        <code class="ks-mono text-xs">fonts.gstatic.com</code>, e <code class="ks-mono text-xs">font-display: swap</code>
+        para evitar texto invisível durante o carregamento.
+      </p>
+    </div>
+    <div>
+      <p class="ks-mono text-[11px] uppercase tracking-[0.2em] text-ink-950/45">Pilha de fallback</p>
+      <p class="mt-3 text-sm leading-relaxed text-ink-950/70">
+        Cada família declara um fallback genérico do sistema — <code class="ks-mono text-xs">serif</code> para
+        display/accent e <code class="ks-mono text-xs">sans-serif</code> / <code class="ks-mono text-xs">monospace</code>
+        para o restante — garantindo layout estável antes do carregamento do webfont.
+      </p>
+    </div>
+    <div>
+      <p class="ks-mono text-[11px] uppercase tracking-[0.2em] text-ink-950/45">Pesos carregados</p>
+      <ul class="mt-3 space-y-1 text-sm text-ink-950/70">
+        <li><b class="font-display">Cinzel</b> — 400 / 500 / 600</li>
+        <li><b class="font-accent italic">Cormorant Garamond</b> — 300 / 400 / 500 + itálico</li>
+        <li><b>Inter</b> — 300 / 400 / 500 / 600 / 700</li>
+        <li><b class="ks-mono">JetBrains Mono</b> — 400 / 500</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Type scale -->
+  <div class="relative space-y-1">
+
+    <div data-reveal class="grid items-baseline gap-4 border-b border-ink-950/10 py-8 md:grid-cols-12">
+      <div class="md:col-span-7"><span class="font-display text-[4.5rem] leading-none tracking-tight md:text-[6rem]">Display</span></div>
+      <div class="ks-mono md:col-span-5 grid grid-cols-2 gap-1 text-[11px] text-ink-950/50 sm:grid-cols-3">
+        <span>Cinzel</span><span>500</span><span>96–120px</span>
+        <span>lh 0.95</span><span>ls -0.01em</span><span>none</span>
+      </div>
+    </div>
+
+    <div data-reveal class="grid items-baseline gap-4 border-b border-ink-950/10 py-8 md:grid-cols-12">
+      <div class="md:col-span-7"><span class="font-display text-6xl leading-none tracking-tight">H1 — Título principal</span></div>
+      <div class="ks-mono md:col-span-5 grid grid-cols-2 gap-1 text-[11px] text-ink-950/50 sm:grid-cols-3">
+        <span>Cinzel</span><span>500</span><span>56–72px</span>
+        <span>lh 1.05</span><span>ls -0.01em</span><span>none</span>
+      </div>
+    </div>
+
+    <div data-reveal class="grid items-baseline gap-4 border-b border-ink-950/10 py-8 md:grid-cols-12">
+      <div class="md:col-span-7"><span class="font-display text-5xl leading-tight tracking-tight">H2 — Seção</span></div>
+      <div class="ks-mono md:col-span-5 grid grid-cols-2 gap-1 text-[11px] text-ink-950/50 sm:grid-cols-3">
+        <span>Cinzel</span><span>500</span><span>40–48px</span>
+        <span>lh 1.1</span><span>ls -0.005em</span><span>none</span>
+      </div>
+    </div>
+
+    <div data-reveal class="grid items-baseline gap-4 border-b border-ink-950/10 py-8 md:grid-cols-12">
+      <div class="md:col-span-7"><span class="font-display text-4xl leading-tight tracking-tight">H3 — Subseção</span></div>
+      <div class="ks-mono md:col-span-5 grid grid-cols-2 gap-1 text-[11px] text-ink-950/50 sm:grid-cols-3">
+        <span>Cinzel</span><span>400</span><span>30–32px</span>
+        <span>lh 1.2</span><span>ls 0em</span><span>none</span>
+      </div>
+    </div>
+
+    <div data-reveal class="grid items-baseline gap-4 border-b border-ink-950/10 py-8 md:grid-cols-12">
+      <div class="md:col-span-7"><span class="text-2xl font-semibold leading-snug tracking-tight">H4 — Bloco de conteúdo</span></div>
+      <div class="ks-mono md:col-span-5 grid grid-cols-2 gap-1 text-[11px] text-ink-950/50 sm:grid-cols-3">
+        <span>Inter</span><span>600</span><span>22–24px</span>
+        <span>lh 1.3</span><span>ls -0.01em</span><span>none</span>
+      </div>
+    </div>
+
+    <div data-reveal class="grid items-baseline gap-4 border-b border-ink-950/10 py-8 md:grid-cols-12">
+      <div class="md:col-span-7"><span class="text-xl font-semibold leading-snug">H5 — Card / componente</span></div>
+      <div class="ks-mono md:col-span-5 grid grid-cols-2 gap-1 text-[11px] text-ink-950/50 sm:grid-cols-3">
+        <span>Inter</span><span>600</span><span>18–20px</span>
+        <span>lh 1.35</span><span>ls 0em</span><span>none</span>
+      </div>
+    </div>
+
+    <div data-reveal class="grid items-baseline gap-4 border-b border-ink-950/10 py-8 md:grid-cols-12">
+      <div class="md:col-span-7"><span class="ks-mono text-xs uppercase tracking-[0.2em] text-ink-950/45">H6 — Eyebrow / rótulo de seção</span></div>
+      <div class="ks-mono md:col-span-5 grid grid-cols-2 gap-1 text-[11px] text-ink-950/50 sm:grid-cols-3">
+        <span>JetBrains Mono</span><span>500</span><span>11–12px</span>
+        <span>lh 1.4</span><span>ls 0.2em</span><span>uppercase</span>
+      </div>
+    </div>
+
+    <div data-reveal class="grid items-baseline gap-4 border-b border-ink-950/10 py-8 md:grid-cols-12">
+      <div class="md:col-span-7"><span class="font-accent italic text-2xl leading-relaxed text-ink-950/80">body-lg — parágrafos de destaque e citações editoriais.</span></div>
+      <div class="ks-mono md:col-span-5 grid grid-cols-2 gap-1 text-[11px] text-ink-950/50 sm:grid-cols-3">
+        <span>Cormorant Garamond</span><span>400 italic</span><span>22–24px</span>
+        <span>lh 1.6</span><span>ls 0em</span><span>none</span>
+      </div>
+    </div>
+
+    <div data-reveal class="grid items-baseline gap-4 border-b border-ink-950/10 py-8 md:grid-cols-12">
+      <div class="md:col-span-7"><span class="text-base leading-relaxed text-ink-950/75">body — texto corrido padrão para parágrafos e descrições de produto.</span></div>
+      <div class="ks-mono md:col-span-5 grid grid-cols-2 gap-1 text-[11px] text-ink-950/50 sm:grid-cols-3">
+        <span>Inter</span><span>400</span><span>15–16px</span>
+        <span>lh 1.7</span><span>ls 0.01em</span><span>none</span>
+      </div>
+    </div>
+
+    <div data-reveal class="grid items-baseline gap-4 border-b border-ink-950/10 py-8 md:grid-cols-12">
+      <div class="md:col-span-7"><span class="text-sm leading-relaxed text-ink-950/60">body-sm — legendas, notas de rodapé e texto auxiliar.</span></div>
+      <div class="ks-mono md:col-span-5 grid grid-cols-2 gap-1 text-[11px] text-ink-950/50 sm:grid-cols-3">
+        <span>Inter</span><span>400</span><span>13–14px</span>
+        <span>lh 1.6</span><span>ls 0.02em</span><span>none</span>
+      </div>
+    </div>
+
+    <div data-reveal class="grid items-baseline gap-4 py-8 md:grid-cols-12">
+      <div class="md:col-span-7"><span class="ks-mono text-[11px] uppercase tracking-[0.25em] text-ink-950/45">label / helper — instruções de formulário e microcopy</span></div>
+      <div class="ks-mono md:col-span-5 grid grid-cols-2 gap-1 text-[11px] text-ink-950/50 sm:grid-cols-3">
+        <span>JetBrains Mono</span><span>400</span><span>11px</span>
+        <span>lh 1.5</span><span>ls 0.15em</span><span>uppercase</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 3. COLOR SYSTEM -->
+<!-- ============================================================ -->
+<section id="cores" class="relative overflow-hidden bg-ink-950 px-6 py-24 text-ivory-50 md:px-14">
+  <div class="pointer-events-none absolute inset-0 opacity-[0.04] ks-noise"></div>
+  <div data-parallax data-speed="0.14" class="pointer-events-none absolute -left-40 bottom-0 h-[32rem] w-[32rem] rounded-full bg-gold-500/10 blur-[130px]"></div>
+
+  <div class="relative mb-16 grid gap-10 lg:grid-cols-12">
+    <span data-reveal class="ks-mono lg:col-span-2 self-start rounded-full border border-white/15 px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-ivory-200/60">02 — Sistema</span>
+    <h2 data-reveal class="font-display text-6xl leading-none tracking-tight lg:col-span-10 lg:text-8xl">Cores</h2>
+  </div>
+
+  <div class="relative grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+
+    <!-- ink-950 -->
+    <div data-reveal class="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+      <div class="h-28 bg-ink-950 border-b border-white/10"></div>
+      <div class="p-5">
+        <p class="text-sm font-semibold">ink-950 <span class="ks-mono text-[11px] font-normal text-ivory-200/40">· neutral / base</span></p>
+        <p class="ks-mono mt-1 text-[11px] text-ivory-200/50">#050505 · rgb(5,5,5) · hsl(0,0%,2%)</p>
+        <p class="mt-3 text-xs leading-relaxed text-ivory-200/60">Fundo primário de todas as páginas. Contraste AAA contra ivory-50 e gold-400.</p>
+      </div>
+    </div>
+
+    <!-- ink-900 -->
+    <div data-reveal class="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+      <div class="h-28 bg-ink-900 border-b border-white/10"></div>
+      <div class="p-5">
+        <p class="text-sm font-semibold">ink-900 <span class="ks-mono text-[11px] font-normal text-ivory-200/40">· neutral / surface</span></p>
+        <p class="ks-mono mt-1 text-[11px] text-ivory-200/50">#0a0a0a · rgb(10,10,10) · hsl(0,0%,4%)</p>
+        <p class="mt-3 text-xs leading-relaxed text-ivory-200/60">Superfícies elevadas: cards, navbars, faixas de marquee sobre o fundo base.</p>
+      </div>
+    </div>
+
+    <!-- ink-800 -->
+    <div data-reveal class="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+      <div class="h-28 bg-ink-800 border-b border-white/10"></div>
+      <div class="p-5">
+        <p class="text-sm font-semibold">ink-800 <span class="ks-mono text-[11px] font-normal text-ivory-200/40">· neutral / border</span></p>
+        <p class="ks-mono mt-1 text-[11px] text-ivory-200/50">#121212 · rgb(18,18,18) · hsl(0,0%,7%)</p>
+        <p class="mt-3 text-xs leading-relaxed text-ivory-200/60">Bordas e divisores sutis sobre fundo escuro; nunca usado em texto.</p>
+      </div>
+    </div>
+
+    <!-- ivory-50 -->
+    <div data-reveal class="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+      <div class="h-28 bg-ivory-50 border-b border-white/10"></div>
+      <div class="p-5">
+        <p class="text-sm font-semibold">ivory-50 <span class="ks-mono text-[11px] font-normal text-ivory-200/40">· neutral / inverse</span></p>
+        <p class="ks-mono mt-1 text-[11px] text-ivory-200/50">#f7f4ee · rgb(247,244,238) · hsl(40,36%,95%)</p>
+        <p class="mt-3 text-xs leading-relaxed text-ivory-200/60">Texto principal sobre fundo escuro; fundo de seções claras (editorial).</p>
+      </div>
+    </div>
+
+    <!-- ivory-200 -->
+    <div data-reveal class="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+      <div class="h-28 bg-ivory-200 border-b border-white/10"></div>
+      <div class="p-5">
+        <p class="text-sm font-semibold">ivory-200 <span class="ks-mono text-[11px] font-normal text-ivory-200/40">· neutral / muted</span></p>
+        <p class="ks-mono mt-1 text-[11px] text-ivory-200/50">#e9e3d8 · rgb(233,227,216) · hsl(35,29%,88%)</p>
+        <p class="mt-3 text-xs leading-relaxed text-ivory-200/60">Texto secundário e ícones de apoio sobre fundo escuro.</p>
+      </div>
+    </div>
+
+    <!-- gold-500 -->
+    <div data-reveal class="overflow-hidden rounded-2xl border border-gold-500/40 bg-white/[0.02]">
+      <div class="h-28 bg-gold-500 border-b border-white/10"></div>
+      <div class="p-5">
+        <p class="text-sm font-semibold text-gold-400">gold-500 <span class="ks-mono text-[11px] font-normal text-ivory-200/40">· primary / accent</span></p>
+        <p class="ks-mono mt-1 text-[11px] text-ivory-200/50">#c9a15a · rgb(201,161,90) · hsl(38,51%,57%)</p>
+        <p class="mt-3 text-xs leading-relaxed text-ivory-200/60">CTA primário, bordas de destaque, ícones ativos. AA contra ink-950; usar texto ink-950 sobre este fundo.</p>
+      </div>
+    </div>
+
+    <!-- gold-400 -->
+    <div data-reveal class="overflow-hidden rounded-2xl border border-gold-500/40 bg-white/[0.02]">
+      <div class="h-28 bg-gold-400 border-b border-white/10"></div>
+      <div class="p-5">
+        <p class="text-sm font-semibold text-gold-400">gold-400 <span class="ks-mono text-[11px] font-normal text-ivory-200/40">· primary / hover</span></p>
+        <p class="ks-mono mt-1 text-[11px] text-ivory-200/50">#e6cf9e · rgb(230,207,158) · hsl(41,59%,76%)</p>
+        <p class="mt-3 text-xs leading-relaxed text-ivory-200/60">Estado hover de botões dourados e realces tipográficos (itálico, links).</p>
+      </div>
+    </div>
+
+    <!-- gold-600 -->
+    <div data-reveal class="overflow-hidden rounded-2xl border border-gold-500/40 bg-white/[0.02]">
+      <div class="h-28 bg-gold-600 border-b border-white/10"></div>
+      <div class="p-5">
+        <p class="text-sm font-semibold text-gold-400">gold-600 <span class="ks-mono text-[11px] font-normal text-ivory-200/40">· primary / active</span></p>
+        <p class="ks-mono mt-1 text-[11px] text-ivory-200/50">#a67c3d · rgb(166,124,61) · hsl(35,46%,45%)</p>
+        <p class="mt-3 text-xs leading-relaxed text-ivory-200/60">Estado pressed/active de botões e realces sobre fundo claro.</p>
+      </div>
+    </div>
+
+    <!-- gold-700 -->
+    <div data-reveal class="overflow-hidden rounded-2xl border border-gold-500/40 bg-white/[0.02]">
+      <div class="h-28 bg-gold-700 border-b border-white/10"></div>
+      <div class="p-5">
+        <p class="text-sm font-semibold text-gold-400">gold-700 <span class="ks-mono text-[11px] font-normal text-ivory-200/40">· primary / border</span></p>
+        <p class="ks-mono mt-1 text-[11px] text-ivory-200/50">#7c5b28 · rgb(124,91,40) · hsl(35,51%,32%)</p>
+        <p class="mt-3 text-xs leading-relaxed text-ivory-200/60">Bordas douradas discretas sobre fundo escuro; nunca como texto.</p>
+      </div>
+    </div>
+
+    <!-- success -->
+    <div data-reveal class="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+      <div class="h-28 bg-success border-b border-white/10"></div>
+      <div class="p-5">
+        <p class="text-sm font-semibold">success <span class="ks-mono text-[11px] font-normal text-ivory-200/40">· feedback</span></p>
+        <p class="ks-mono mt-1 text-[11px] text-ivory-200/50">#8fae7c · rgb(143,174,124) · hsl(97,24%,58%)</p>
+        <p class="mt-3 text-xs leading-relaxed text-ivory-200/60">Confirmações de formulário (ex.: inscrição enviada). Verde sálvia, nunca neon.</p>
+      </div>
+    </div>
+
+    <!-- warning -->
+    <div data-reveal class="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+      <div class="h-28 bg-warning border-b border-white/10"></div>
+      <div class="p-5">
+        <p class="text-sm font-semibold">warning <span class="ks-mono text-[11px] font-normal text-ivory-200/40">· feedback</span></p>
+        <p class="ks-mono mt-1 text-[11px] text-ivory-200/50">#d9b06a · rgb(217,176,106) · hsl(38,59%,63%)</p>
+        <p class="mt-3 text-xs leading-relaxed text-ivory-200/60">Alertas não-críticos, estoque baixo, avisos de formulário.</p>
+      </div>
+    </div>
+
+    <!-- danger -->
+    <div data-reveal class="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
+      <div class="h-28 bg-danger border-b border-white/10"></div>
+      <div class="p-5">
+        <p class="text-sm font-semibold">danger <span class="ks-mono text-[11px] font-normal text-ivory-200/40">· feedback</span></p>
+        <p class="ks-mono mt-1 text-[11px] text-ivory-200/50">#d98a8a · rgb(217,138,138) · hsl(0,51%,70%)</p>
+        <p class="mt-3 text-xs leading-relaxed text-ivory-200/60">Erros de formulário e falhas de envio. Vermelho suave, sem estridência.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Opacity ramp + gradients -->
+  <div data-reveal class="relative mt-14 grid gap-6 lg:grid-cols-2">
+    <div class="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+      <p class="ks-mono mb-4 text-[11px] uppercase tracking-[0.2em] text-ivory-200/50">Rampa de opacidade — gold-500</p>
+      <div class="flex overflow-hidden rounded-xl border border-white/10">
+        <div class="h-16 flex-1 bg-gold-500/10 flex items-end p-2 ks-mono text-[10px] text-ivory-200/60">10%</div>
+        <div class="h-16 flex-1 bg-gold-500/20 flex items-end p-2 ks-mono text-[10px] text-ivory-200/60">20%</div>
+        <div class="h-16 flex-1 bg-gold-500/40 flex items-end p-2 ks-mono text-[10px] text-ivory-200/60">40%</div>
+        <div class="h-16 flex-1 bg-gold-500/60 flex items-end p-2 ks-mono text-[10px] text-ink-950/70">60%</div>
+        <div class="h-16 flex-1 bg-gold-500/80 flex items-end p-2 ks-mono text-[10px] text-ink-950/70">80%</div>
+        <div class="h-16 flex-1 bg-gold-500 flex items-end p-2 ks-mono text-[10px] text-ink-950/70">100%</div>
+      </div>
+    </div>
+    <div class="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+      <p class="ks-mono mb-4 text-[11px] uppercase tracking-[0.2em] text-ivory-200/50">Gradientes decorativos</p>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="h-16 rounded-xl" style="background:linear-gradient(115deg,#7c5b28,#e6cf9e 45%,#c9a15a 65%,#7c5b28)"></div>
+        <div class="h-16 rounded-xl bg-gradient-to-t from-ink-950 via-ink-950/40 to-transparent border border-white/10"></div>
+      </div>
+      <p class="mt-3 text-xs text-ivory-200/50">Aurora Gold (títulos em destaque) · Vignette (overlay sobre imagens/cards)</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 4. UI COMPONENTS -->
+<!-- ============================================================ -->
+<section id="componentes" class="relative overflow-hidden bg-ivory-50 px-6 py-24 text-ink-950 md:px-14">
+  <div data-parallax data-speed="0.1" class="pointer-events-none absolute -right-32 bottom-0 h-[28rem] w-[28rem] rounded-full bg-gold-500/10 blur-[120px]"></div>
+
+  <div class="relative mb-16 grid gap-10 lg:grid-cols-12">
+    <span data-reveal class="ks-mono lg:col-span-2 self-start rounded-full border border-ink-950/15 px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-ink-950/60">03 — Sistema</span>
+    <h2 data-reveal class="font-display text-6xl leading-none tracking-tight lg:col-span-10 lg:text-8xl">Componentes</h2>
+  </div>
+
+  <!-- Buttons -->
+  <div data-reveal class="relative mb-20">
+    <h3 class="font-display text-2xl mb-6">Botões</h3>
+    <div class="grid gap-6 rounded-3xl border border-ink-950/10 bg-white p-8 shadow-xl shadow-black/5 md:grid-cols-2">
+      <div class="flex flex-wrap items-center gap-4">
+        <button class="ks-btn rounded-full bg-gold-500 px-7 py-3.5 text-sm font-semibold text-ink-950 shadow-lg shadow-gold-500/20 transition hover:bg-gold-400">Primário</button>
+        <button class="ks-btn rounded-full border border-ink-950/20 px-7 py-3.5 text-sm font-semibold transition hover:border-gold-600 hover:text-gold-600">Secundário</button>
+        <button class="ks-btn text-sm font-semibold underline decoration-gold-500 decoration-2 underline-offset-4 transition hover:text-gold-600">Terciário</button>
+        <button class="ks-btn flex h-11 w-11 items-center justify-center rounded-full bg-ink-950 text-white transition hover:bg-ink-800" data-tooltip="Adicionar">
+          <i data-lucide="plus" class="h-4 w-4"></i>
+        </button>
+        <button disabled class="cursor-not-allowed rounded-full bg-ink-950/10 px-7 py-3.5 text-sm font-semibold text-ink-950/30">Desabilitado</button>
+      </div>
+      <div class="ks-mono text-xs leading-relaxed text-ink-950/50">
+        <p class="mb-2 text-ink-950/70">Microinteração (todos os variantes, exceto disabled):</p>
+        <pre class="overflow-x-auto rounded-xl bg-ink-950 p-4 text-ivory-200"><code>el.addEventListener("mouseenter", () =>
+  gsap.to(el, { scale: 1.035, duration: .25, ease: "power2.out" }));
+el.addEventListener("mouseleave", () =>
+  gsap.to(el, { scale: 1, duration: .25, ease: "power2.out" }));</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inputs -->
+  <div data-reveal class="relative mb-20">
+    <h3 class="font-display text-2xl mb-6">Campos de formulário</h3>
+    <div class="grid gap-6 rounded-3xl border border-ink-950/10 bg-white p-8 shadow-xl shadow-black/5 md:grid-cols-2">
+      <div class="space-y-5">
+        <div>
+          <label class="ks-mono mb-2 block text-[11px] uppercase tracking-[0.15em] text-ink-950/50">Padrão</label>
+          <input type="text" placeholder="Seu nome" class="w-full rounded-xl border border-ink-950/15 bg-ivory-50/60 px-4 py-3 text-sm outline-none transition focus:border-gold-500 focus:ring-4 focus:ring-gold-500/15">
+        </div>
+        <div>
+          <label class="ks-mono mb-2 block text-[11px] uppercase tracking-[0.15em] text-danger">Erro</label>
+          <input type="email" value="email-invalido" class="w-full rounded-xl border border-danger bg-danger/5 px-4 py-3 text-sm outline-none ring-4 ring-danger/10">
+          <p class="mt-2 text-xs text-danger">Insira um e-mail válido.</p>
+        </div>
+      </div>
+      <div class="space-y-5">
+        <div>
+          <label class="ks-mono mb-2 block text-[11px] uppercase tracking-[0.15em] text-ink-950/50">Textarea</label>
+          <textarea rows="3" placeholder="Sua mensagem" class="w-full rounded-xl border border-ink-950/15 bg-ivory-50/60 px-4 py-3 text-sm outline-none transition focus:border-gold-500 focus:ring-4 focus:ring-gold-500/15"></textarea>
+        </div>
+        <div>
+          <label class="ks-mono mb-2 block text-[11px] uppercase tracking-[0.15em] text-ink-950/30">Desabilitado</label>
+          <input disabled value="Indisponível" class="w-full cursor-not-allowed rounded-xl border border-ink-950/10 bg-ink-950/5 px-4 py-3 text-sm text-ink-950/30">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cards -->
+  <div data-reveal class="relative mb-20">
+    <h3 class="font-display text-2xl mb-6">Cards</h3>
+    <div class="grid gap-6 md:grid-cols-3">
+      <div class="group overflow-hidden rounded-2xl bg-ink-950 text-white shadow-xl shadow-black/10 transition hover:-translate-y-1 hover:shadow-2xl">
+        <div class="relative h-40 bg-gradient-to-br from-gold-700/40 via-ink-900 to-ink-950">
+          <div class="absolute inset-0 bg-gradient-to-t from-ink-950 to-transparent"></div>
+        </div>
+        <div class="p-6">
+          <p class="ks-mono text-[10px] uppercase tracking-[0.2em] text-ivory-200/60">Marca</p>
+          <p class="mt-2 text-lg font-semibold">Card de marca</p>
+          <p class="mt-1 text-xs text-ivory-200/50">Imagem + overlay gradiente + eyebrow dourado</p>
+        </div>
+      </div>
+      <div class="rounded-2xl border border-ink-950/10 bg-white p-6 shadow-xl shadow-black/5">
+        <i data-lucide="trending-up" class="h-6 w-6 text-ink-950/70"></i>
+        <p class="mt-4 text-3xl font-semibold tracking-tight">05</p>
+        <p class="ks-mono text-[11px] uppercase tracking-[0.15em] text-ink-950/50">marcas em curadoria</p>
+      </div>
+      <div class="rounded-2xl bg-ivory-200/60 p-6">
+        <i data-lucide="quote" class="h-5 w-5 text-ink-950/40"></i>
+        <p class="font-accent italic mt-3 text-lg leading-relaxed text-ink-950/80">
+          "Elegância silenciosa, curadoria exclusiva."
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navbar states -->
+  <div data-reveal class="relative mb-20">
+    <h3 class="font-display text-2xl mb-6">Navbar</h3>
+    <div class="space-y-4 rounded-3xl border border-ink-950/10 bg-ink-950 p-8">
+      <div class="ks-glass flex items-center justify-between rounded-full px-6 py-3">
+        <span class="text-sm font-semibold text-white">KLASMĒ</span>
+        <div class="flex gap-6 text-xs text-ivory-200/70">
+          <span>Marca</span><span>Produtos</span><span>Sobre</span>
+        </div>
+        <button class="rounded-full bg-white px-4 py-2 text-xs font-semibold text-ink-950">Comprar</button>
+      </div>
+      <p class="ks-mono text-[11px] text-ivory-200/40">Estado padrão — glass translúcido sobre o hero. No scroll, a navbar ganha <code>bg-ink-950/90</code> + <code>backdrop-blur</code> sólido.</p>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div data-reveal class="relative mb-20">
+    <h3 class="font-display text-2xl mb-6">Modal</h3>
+    <div class="rounded-3xl border border-ink-950/10 bg-white p-8 shadow-xl shadow-black/5">
+      <button id="ks-modal-open" class="ks-btn rounded-full bg-ink-950 px-7 py-3.5 text-sm font-semibold text-white transition hover:bg-ink-800">
+        Abrir modal de exemplo
+      </button>
+      <p class="ks-mono mt-4 text-[11px] text-ink-950/40">Entrada: fade + scale 0.94→1, 400ms power3.out · Saída: 250ms power2.in</p>
+    </div>
+  </div>
+
+  <!-- Badges -->
+  <div data-reveal class="relative mb-20">
+    <h3 class="font-display text-2xl mb-6">Badges</h3>
+    <div class="flex flex-wrap gap-3 rounded-3xl border border-ink-950/10 bg-white p-8 shadow-xl shadow-black/5">
+      <span class="rounded-full bg-gold-500 px-4 py-1.5 text-xs font-semibold text-ink-950">Sólido</span>
+      <span class="rounded-full border border-gold-600 px-4 py-1.5 text-xs font-semibold text-gold-600">Outline</span>
+      <span class="rounded-full bg-ink-950/5 px-4 py-1.5 text-xs font-semibold text-ink-950/60">Neutro</span>
+      <span class="rounded-full bg-success/15 px-4 py-1.5 text-xs font-semibold text-success">Sucesso</span>
+      <span class="rounded-full bg-warning/15 px-4 py-1.5 text-xs font-semibold text-warning">Atenção</span>
+      <span class="rounded-full bg-danger/15 px-4 py-1.5 text-xs font-semibold text-danger">Erro</span>
+    </div>
+  </div>
+
+  <!-- Tooltips -->
+  <div data-reveal class="relative">
+    <h3 class="font-display text-2xl mb-6">Tooltips</h3>
+    <div class="flex items-center gap-6 rounded-3xl border border-ink-950/10 bg-white p-8 shadow-xl shadow-black/5">
+      <button data-tooltip="Favoritar" class="flex h-11 w-11 items-center justify-center rounded-full border border-ink-950/15 transition hover:border-ink-950/40"><i data-lucide="heart" class="h-4 w-4"></i></button>
+      <button data-tooltip="Compartilhar" class="flex h-11 w-11 items-center justify-center rounded-full border border-ink-950/15 transition hover:border-ink-950/40"><i data-lucide="share-2" class="h-4 w-4"></i></button>
+      <button data-tooltip="Mais informações" class="flex h-11 w-11 items-center justify-center rounded-full border border-ink-950/15 transition hover:border-ink-950/40"><i data-lucide="info" class="h-4 w-4"></i></button>
+      <p class="ks-mono text-[11px] text-ink-950/40">CSS puro · fade + translateY(4px→0), 200ms ease</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 5. ICONS -->
+<!-- ============================================================ -->
+<section id="icones" class="relative overflow-hidden bg-ink-950 px-6 py-24 text-ivory-50 md:px-14">
+  <div class="pointer-events-none absolute inset-0 opacity-[0.04] ks-noise"></div>
+
+  <div class="relative mb-16 grid gap-10 lg:grid-cols-12">
+    <span data-reveal class="ks-mono lg:col-span-2 self-start rounded-full border border-white/15 px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-ivory-200/60">04 — Sistema</span>
+    <h2 data-reveal class="font-display text-6xl leading-none tracking-tight lg:col-span-10 lg:text-8xl">Ícones</h2>
+  </div>
+
+  <div data-reveal class="relative mb-10 flex flex-wrap gap-4 ks-mono text-[11px] text-ivory-200/50">
+    <span class="rounded-full border border-white/10 px-3 py-1.5">Biblioteca: Lucide (via unpkg CDN)</span>
+    <span class="rounded-full border border-white/10 px-3 py-1.5">stroke-width global: 1.5</span>
+    <span class="rounded-full border border-white/10 px-3 py-1.5">Tamanhos: 16 / 20 / 24 / 32px</span>
+  </div>
+
+  <div class="relative grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6">
+    <!-- data-reveal wraps each tile; icons render via lucide.createIcons() -->
+    <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-gold-500/40"><i data-lucide="sparkles" class="h-6 w-6 text-gold-400"></i><span class="ks-mono text-[10px] text-ivory-200/50">sparkles</span></div>
+    <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-white/25"><i data-lucide="leaf" class="h-6 w-6 text-ivory-100/80"></i><span class="ks-mono text-[10px] text-ivory-200/50">leaf</span></div>
+    <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-gold-500/40"><i data-lucide="gem" class="h-6 w-6 text-gold-400"></i><span class="ks-mono text-[10px] text-ivory-200/50">gem</span></div>
+    <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-white/25"><i data-lucide="shield-check" class="h-6 w-6 text-ivory-100/80"></i><span class="ks-mono text-[10px] text-ivory-200/50">shield-check</span></div>
+    <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-white/25"><i data-lucide="truck" class="h-6 w-6 text-ivory-100/80"></i><span class="ks-mono text-[10px] text-ivory-200/50">truck</span></div>
+    <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-white/25"><i data-lucide="heart" class="h-6 w-6 text-ivory-100/80"></i><span class="ks-mono text-[10px] text-ivory-200/50">heart</span></div>
+    <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-white/25"><i data-lucide="star" class="h-6 w-6 text-ivory-100/80"></i><span class="ks-mono text-[10px] text-ivory-200/50">star</span></div>
+    <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-white/25"><i data-lucide="package" class="h-6 w-6 text-ivory-100/80"></i><span class="ks-mono text-[10px] text-ivory-200/50">package</span></div>
+    <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-white/25"><i data-lucide="badge-check" class="h-6 w-6 text-ivory-100/80"></i><span class="ks-mono text-[10px] text-ivory-200/50">badge-check</span></div>
+    <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-white/25"><i data-lucide="instagram" class="h-6 w-6 text-ivory-100/80"></i><span class="ks-mono text-[10px] text-ivory-200/50">instagram</span></div>
+    <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-white/25"><i data-lucide="mail" class="h-6 w-6 text-ivory-100/80"></i><span class="ks-mono text-[10px] text-ivory-200/50">mail</span></div>
+    <div data-reveal class="flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-6 transition hover:border-white/25"><i data-lucide="arrow-up-right" class="h-6 w-6 text-ivory-100/80"></i><span class="ks-mono text-[10px] text-ivory-200/50">arrow-up-right</span></div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- 6. ANIMATIONS -->
+<!-- ============================================================ -->
+<section id="animacoes" class="relative overflow-hidden bg-ivory-50 px-6 py-24 text-ink-950 md:px-14">
+  <div data-parallax data-speed="0.12" class="pointer-events-none absolute -left-40 top-40 h-[32rem] w-[32rem] rounded-full bg-gold-500/10 blur-[130px]"></div>
+
+  <div class="relative mb-16 grid gap-10 lg:grid-cols-12">
+    <span data-reveal class="ks-mono lg:col-span-2 self-start rounded-full border border-ink-950/15 px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-ink-950/60">05 — Sistema</span>
+    <h2 data-reveal class="font-display text-6xl leading-none tracking-tight lg:col-span-10 lg:text-8xl">Animações</h2>
+  </div>
+
+  <div class="relative grid gap-6 lg:grid-cols-2">
+
+    <div data-reveal class="rounded-3xl border border-ink-950/10 bg-white p-8 shadow-xl shadow-black/5">
+      <p class="ks-mono text-[11px] uppercase tracking-[0.2em] text-ink-950/45">data-reveal</p>
+      <p class="mt-3 text-sm leading-relaxed text-ink-950/70">Surgimento padrão de qualquer elemento: opacidade + leve subida + desfoque, disparado no load (hero) ou ao entrar em viewport (demais seções, once).</p>
+      <pre class="ks-mono mt-4 overflow-x-auto rounded-xl bg-ink-950 p-4 text-xs text-ivory-200"><code>gsap.set("[data-reveal]", { autoAlpha:0, y:26, scale:.98, filter:"blur(10px)" });
+gsap.to(items, { autoAlpha:1, y:0, scale:1, filter:"blur(0px)",
+  duration:1.1, stagger:.07, ease:"power3.out",
+  scrollTrigger:{ trigger:section, start:"top 78%", once:true }});</code></pre>
+    </div>
+
+    <div data-reveal class="rounded-3xl border border-ink-950/10 bg-white p-8 shadow-xl shadow-black/5">
+      <p class="ks-mono text-[11px] uppercase tracking-[0.2em] text-ink-950/45">data-hero-word</p>
+      <p class="mt-3 text-sm leading-relaxed text-ink-950/70">A palavra-marca gigante ao fundo do hero: entra em escala + blur, depois se move em paralaxe lento conforme o scroll.</p>
+      <pre class="ks-mono mt-4 overflow-x-auto rounded-xl bg-ink-950 p-4 text-xs text-ivory-200"><code>gsap.to("[data-hero-word]", { yPercent:8, scale:1.03, ease:"none",
+  scrollTrigger:{ trigger:"section:first-child",
+    start:"top top", end:"bottom top", scrub:1.6 }});</code></pre>
+    </div>
+
+    <div data-reveal class="rounded-3xl border border-ink-950/10 bg-white p-8 shadow-xl shadow-black/5">
+      <p class="ks-mono text-[11px] uppercase tracking-[0.2em] text-ink-950/45">data-float</p>
+      <p class="mt-3 text-sm leading-relaxed text-ink-950/70">Flutuação suave e contínua em elementos decorativos ou cards flutuantes — nunca aplicado a texto de leitura. Sempre encadeada dentro da própria timeline de entrada do elemento (nunca como um tween solto e imediato), para o loop nascer exatamente de onde a entrada parou, sem salto.</p>
+      <pre class="ks-mono mt-4 overflow-x-auto rounded-xl bg-ink-950 p-4 text-xs text-ivory-200"><code>hero.to(el, { autoAlpha:1, y:0, ... })       // entrada
+    .to(el, { y:-18, rotate:1, ease:"sine.inOut",
+      repeat:-1, yoyo:true, duration:4.5 });  // loop, encadeado</code></pre>
+    </div>
+
+    <div data-reveal class="rounded-3xl border border-ink-950/10 bg-white p-8 shadow-xl shadow-black/5">
+      <p class="ks-mono text-[11px] uppercase tracking-[0.2em] text-ink-950/45">data-parallax + data-speed</p>
+      <p class="mt-3 text-sm leading-relaxed text-ink-950/70">Camadas decorativas (orbs, blobs de luz) se deslocam em velocidade própria conforme o scroll, dando profundidade ao fundo.</p>
+      <pre class="ks-mono mt-4 overflow-x-auto rounded-xl bg-ink-950 p-4 text-xs text-ivory-200"><code>gsap.to(layer, { yPercent: speed*100, ease:"none",
+  scrollTrigger:{ trigger:section, start:"top bottom",
+    end:"bottom top", scrub:1.2 }});</code></pre>
+    </div>
+
+    <div data-reveal class="rounded-3xl border border-ink-950/10 bg-white p-8 shadow-xl shadow-black/5">
+      <p class="ks-mono text-[11px] uppercase tracking-[0.2em] text-gold-600">Magnetic hover (botões e links)</p>
+      <p class="mt-3 text-sm leading-relaxed text-ink-950/70">Todo <code class="ks-mono text-xs">button</code> e <code class="ks-mono text-xs">a</code> ganha um leve aumento de escala ao passar o mouse — a assinatura tátil do sistema.</p>
+      <pre class="ks-mono mt-4 overflow-x-auto rounded-xl bg-ink-950 p-4 text-xs text-ivory-200"><code>gsap.utils.toArray("button, a").forEach(el => {
+  el.addEventListener("mouseenter", () =>
+    gsap.to(el, { scale:1.035, duration:.25, ease:"power2.out" }));
+  el.addEventListener("mouseleave", () =>
+    gsap.to(el, { scale:1, duration:.25, ease:"power2.out" }));
+});</code></pre>
+    </div>
+
+    <div data-reveal class="rounded-3xl border border-ink-950/10 bg-white p-8 shadow-xl shadow-black/5">
+      <p class="ks-mono text-[11px] uppercase tracking-[0.2em] text-ink-950/45">Marquee &amp; noise overlay</p>
+      <p class="mt-3 text-sm leading-relaxed text-ink-950/70">Faixa de texto em loop infinito (CSS puro, pausa no hover) e uma leve textura de ruído SVG sobre fundos escuros, para tirar a chapadez do preto.</p>
+      <pre class="ks-mono mt-4 overflow-x-auto rounded-xl bg-ink-950 p-4 text-xs text-ivory-200"><code>@keyframes ks-marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.ks-marquee:hover .ks-marquee-track { animation-play-state:paused; }</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="relative border-t border-white/10 bg-ink-950 px-6 py-12 text-center text-ivory-200/40 md:px-14">
+  <p class="ks-mono text-[11px] uppercase tracking-[0.2em]">Klasmē Group — Design System v1.0</p>
+  <p class="mt-2 text-xs">Construído sobre Tailwind CDN, GSAP + ScrollTrigger e Lucide Icons.</p>
+</footer>
+
+<!-- Modal markup -->
+<div id="ks-modal" class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center px-6 opacity-0">
+  <div id="ks-modal-backdrop" class="ks-modal-backdrop absolute inset-0"></div>
+  <div id="ks-modal-panel" class="relative w-full max-w-md rounded-3xl bg-ivory-50 p-8 text-ink-950 shadow-2xl">
+    <button id="ks-modal-close" class="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full border border-ink-950/10 transition hover:border-ink-950/40">
+      <i data-lucide="x" class="h-4 w-4"></i>
+    </button>
+    <p class="ks-mono text-[11px] uppercase tracking-[0.2em] text-ink-950/45">Exemplo de modal</p>
+    <h3 class="font-display mt-2 text-3xl">Fique por dentro</h3>
+    <p class="mt-3 text-sm leading-relaxed text-ink-950/60">Entrada em fade + scale via GSAP, backdrop com blur — o mesmo padrão usado em qualquer diálogo do sistema.</p>
+    <button class="ks-btn mt-6 w-full rounded-full bg-gold-500 px-6 py-3.5 text-sm font-semibold text-ink-950 transition hover:bg-gold-400">Entendi</button>
+  </div>
+</div>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+  lucide.createIcons({ attrs: { "stroke-width": 1.5 } });
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  gsap.set("[data-reveal]", { autoAlpha: 0, y: 26, scale: 0.98, filter: "blur(10px)" });
+  gsap.set("[data-hero-word]", { autoAlpha: 0, scale: 0.97, filter: "blur(10px)" });
+  gsap.set("[data-product-hero]", { autoAlpha: 0, y: 30, scale: 0.97, filter: "blur(14px)" });
+
+  // The PIN itself — the thing that reserves scroll geometry and holds
+  // the section in place — is created right now, synchronously, before
+  // the user can possibly scroll. This is the part that must never be
+  // deferred: if it's created only after the visitor has already
+  // scrolled past where it would engage, ScrollTrigger has to retroactively
+  // insert its spacer and remap the current scroll position into the new
+  // pinned geometry, which is exactly what caused the "thrown back up"
+  // snap. `scrub` is left off here on purpose — this instance only
+  // handles pinning; the actual crossfade values are applied by hand
+  // below via onUpdate, once it's safe to build them.
+  let crossfadeTimeline = null;
+  const heroPinTrigger = ScrollTrigger.create({
+    trigger: "#hero-pin",
+    start: "top top",
+    end: "+=55%",
+    pin: true,
+    anticipatePin: 1,
+    onUpdate(self) {
+      if (crossfadeTimeline) crossfadeTimeline.progress(self.progress);
+    }
+  });
+
+  // Builds the crossfade's actual property tweens as a plain, paused
+  // timeline (no scrollTrigger of its own — it's driven manually by the
+  // onUpdate above). Called once the brief entrance below has finished
+  // rendering, so it safely captures the settled "visible" values instead
+  // of the hidden pre-entrance ones. If the visitor already scrolled
+  // during that short window, it immediately syncs to the current
+  // progress instead of snapping from 0.
+  function buildPinCrossfade() {
+    crossfadeTimeline = gsap.timeline({ paused: true })
+      // Both targets below already carry an infinite float loop that owns
+      // their "y" (px) — this crossfade deliberately uses "yPercent" / no
+      // vertical property at all instead, so the two never fight over the
+      // same transform channel.
+      .to("[data-hero-fade]", { autoAlpha: 0, ease: "none" }, 0)
+      .to("[data-product-hero]", { autoAlpha: 0, scale: 0.78, yPercent: -30, filter: "blur(12px)", ease: "none" }, 0.05)
+      .to("[data-hero-word]", { scale: 1.12, ease: "none" }, 0);
+    crossfadeTimeline.progress(heroPinTrigger.progress);
+  }
+
+  window.addEventListener("load", () => {
+    window.scrollTo(0, 0);
+    // Deliberately brief — a quick settle rather than a long cinematic
+    // reveal, so the page is scroll-ready (see buildPinCrossfade above)
+    // almost as soon as it appears.
+    const hero = gsap.timeline({ defaults: { ease: "power2.out" } });
+    hero
+      .to("[data-hero-word]", { autoAlpha: 1, scale: 1, filter: "blur(0px)", duration: 0.5 })
+      .to("[data-product-hero]", { autoAlpha: 1, y: 0, scale: 1, filter: "blur(0px)", duration: 0.45 }, "-=0.35")
+      .to("header [data-reveal]", { autoAlpha: 1, y: 0, scale: 1, filter: "blur(0px)", duration: 0.4, stagger: 0.05 }, "-=0.3")
+      // "#hero-pin > [data-reveal]" catches the eyebrow badge and the
+      // "Rolar" scroll cue — both are direct children of the section,
+      // siblings of #hero rather than inside it, so the selector above
+      // never reached them and they stayed permanently hidden.
+      .to("#hero [data-reveal], #hero-pin > [data-reveal]", { autoAlpha: 1, y: 0, scale: 1, filter: "blur(0px)", duration: 0.4, stagger: 0.05 }, "-=0.25")
+      // Entrance is fully settled at this exact point in the timeline —
+      // safe to hand these elements off to the scroll-driven crossfade.
+      .call(buildPinCrossfade)
+      // Every infinite float loop is chained right here, starting exactly
+      // from the position the entrance just landed on — no separate tween
+      // ever fights over these elements' y, so there is no jump when they
+      // hand off into the continuous loop. Applies to the product image
+      // AND the floating badge (both carry data-float).
+      .to("[data-product-hero]", { y: -18, rotate: 1, ease: "sine.inOut", repeat: -1, yoyo: true, duration: 4.5 }, "float")
+      .to("#hero [data-reveal][data-float]", { y: -14, ease: "sine.inOut", repeat: -1, yoyo: true, duration: 4.2 }, "float");
+  });
+
+  // #hero-pin's [data-reveal] items are fully handled by the dedicated
+  // hero entrance + pinned-crossfade timelines above — deliberately
+  // skipped here so no third tween ever competes for the same properties.
+  document.querySelectorAll("section").forEach((section) => {
+    if (section.id === "hero-pin") return;
+    const items = section.querySelectorAll("[data-reveal]");
+    if (!items.length) return;
+
+    gsap.to(items, {
+      autoAlpha: 1,
+      y: 0,
+      scale: 1,
+      filter: "blur(0px)",
+      duration: 1.1,
+      ease: "power3.out",
+      stagger: 0.07,
+      scrollTrigger: { trigger: section, start: "top 78%", once: true }
+    });
+  });
+
+  document.querySelectorAll("[data-parallax]").forEach((layer) => {
+    const speed = Number(layer.dataset.speed || 0.1);
+    gsap.to(layer, {
+      yPercent: speed * 100,
+      ease: "none",
+      scrollTrigger: {
+        trigger: layer.closest("section") || document.body,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 1.2
+      }
+    });
+  });
+
+  gsap.utils.toArray("button, a").forEach((el) => {
+    el.addEventListener("mouseenter", () => gsap.to(el, { scale: 1.035, duration: 0.25, ease: "power2.out" }));
+    el.addEventListener("mouseleave", () => gsap.to(el, { scale: 1, duration: 0.25, ease: "power2.out" }));
+  });
+
+  // Smooth anchor scrolling, done per-click instead of via CSS
+  // scroll-behavior — the CSS version fights the pinned hero's
+  // scroll-driven animation and causes stutter.
+  document.querySelectorAll('a[href^="#"]').forEach((a) => {
+    a.addEventListener("click", (e) => {
+      const id = a.getAttribute("href");
+      const target = id.length > 1 ? document.querySelector(id) : null;
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  });
+
+  ScrollTrigger.refresh();
+
+  /* Floating gold particles inside the hero */
+  (function () {
+    const wrap = document.getElementById("hero-particles");
+    const count = 24;
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement("span");
+      p.className = "ks-particle";
+      p.style.left = Math.random() * 100 + "%";
+      p.style.setProperty("--drift", (Math.random() * 60 - 30) + "px");
+      p.style.animationDuration = 10 + Math.random() * 12 + "s";
+      p.style.animationDelay = Math.random() * 14 + "s";
+      wrap.appendChild(p);
+    }
+  })();
+
+  /* Modal open/close */
+  (function () {
+    const modal = document.getElementById("ks-modal");
+    const panel = document.getElementById("ks-modal-panel");
+    const backdrop = document.getElementById("ks-modal-backdrop");
+    const openBtn = document.getElementById("ks-modal-open");
+    const closeBtn = document.getElementById("ks-modal-close");
+
+    gsap.set(panel, { autoAlpha: 0, scale: 0.94, y: 16 });
+    gsap.set(backdrop, { autoAlpha: 0 });
+
+    function openModal() {
+      modal.classList.remove("pointer-events-none");
+      gsap.to(backdrop, { autoAlpha: 1, duration: 0.3 });
+      gsap.to(panel, { autoAlpha: 1, scale: 1, y: 0, duration: 0.4, ease: "power3.out" });
+    }
+
+    function closeModal() {
+      gsap.to(backdrop, { autoAlpha: 0, duration: 0.25 });
+      gsap.to(panel, {
+        autoAlpha: 0, scale: 0.94, y: 16, duration: 0.25, ease: "power2.in",
+        onComplete: () => modal.classList.add("pointer-events-none")
+      });
+    }
+
+    openBtn.addEventListener("click", openModal);
+    closeBtn.addEventListener("click", closeModal);
+    backdrop.addEventListener("click", closeModal);
+  })();
+</script>
+</body>
+</html>
