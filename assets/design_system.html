@@ -197,6 +197,13 @@
 <!-- ============================================================ -->
 <section id="hero-pin" class="relative min-h-[60vh] overflow-hidden bg-ink-950 text-ivory-50 md:min-h-screen" style="isolation:isolate;">
 
+  <!-- Background video — same technique as bloom-premium's hero: absolute,
+       cover, muted+autoplay+loop+playsinline so mobile browsers allow it
+       without a tap. -->
+  <video class="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
+         src="videos/hero-florasis.mp4"
+         autoplay muted loop playsinline preload="auto"></video>
+
   <!-- Slow rotating conic sheen — the base layer of ambient movement -->
   <div class="ks-aurora ks-drift-c pointer-events-none absolute -inset-[20%] opacity-60"></div>
 
