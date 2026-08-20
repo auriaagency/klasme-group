@@ -882,6 +882,17 @@ gsap.to(items, { autoAlpha:1, y:0, scale:1, filter:"blur(0px)",
 
   gsap.registerPlugin(ScrollTrigger);
 
+  // Belt-and-suspenders re-assertion of scroll position, right before the
+  // pin below is set up. The <head> script already does this once, but on
+  // a reload from a scrolled position some browsers reapply their own
+  // scroll restoration asynchronously, in the gap between that early
+  // script and this one (which only runs once the whole document has
+  // parsed) — if that happens, the pin gets created against a non-zero
+  // scroll position and its internal geometry comes out wrong, which is
+  // what was misaligning the logo specifically on that reload path.
+  if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }
+  window.scrollTo(0, 0);
+
   gsap.set("[data-reveal]", { autoAlpha: 0, y: 26, scale: 0.98, filter: "blur(10px)" });
   gsap.set("[data-hero-word]", { autoAlpha: 0, scale: 0.97, filter: "blur(10px)" });
   gsap.set("[data-product-hero]", { autoAlpha: 0, y: 30, scale: 0.97, filter: "blur(14px)" });
@@ -929,6 +940,12 @@ gsap.to(items, { autoAlpha:1, y:0, scale:1, filter:"blur(0px)",
 
   window.addEventListener("load", () => {
     window.scrollTo(0, 0);
+    // One more recompute now that every resource (fonts, the product
+    // image, etc.) has actually finished loading and scroll is confirmed
+    // at 0 — cheap insurance that the pin's geometry reflects reality
+    // rather than whatever was measurable at the earlier, partial state.
+    ScrollTrigger.refresh();
+
     // Deliberately brief — a quick settle rather than a long cinematic
     // reveal, so the page is scroll-ready (see buildPinCrossfade above)
     // almost as soon as it appears.
