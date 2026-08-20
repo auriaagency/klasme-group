@@ -49,20 +49,20 @@
 
   a, button { font-family: inherit; }
 
+  :focus-visible { outline: 1px solid rgba(247, 244, 238, .8); outline-offset: 4px; }
+
   /* ============================================================ */
-  /* HERO                                                          */
+  /* HERO — nav, giant background mark, floating product           */
   /* ============================================================ */
 
   .hero {
     position: relative;
     height: 100svh;
-    min-height: 560px;
+    min-height: 620px;
     overflow: hidden;
     isolation: isolate;
     background: var(--ink-950);
   }
-
-  /* ---- media layer -------------------------------------------- */
 
   .hero-media {
     position: absolute;
@@ -80,39 +80,14 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: 62% 40%;
+    object-position: 50% 38%;
     transform: scale(1.08);
-    filter: saturate(1.02) contrast(1.03);
     opacity: 0;
   }
 
   @media (max-width: 767px) {
-    .hero-video { object-position: 68% 32%; }
+    .hero-video { object-position: 58% 30%; }
   }
-
-  .hero-vignette {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    background:
-      linear-gradient(0deg, rgba(5,5,5,.97) 0%, rgba(5,5,5,.86) 22%, rgba(5,5,5,.4) 46%, rgba(5,5,5,.08) 64%, rgba(5,5,5,0) 78%),
-      linear-gradient(100deg, rgba(5,5,5,.92) 0%, rgba(5,5,5,.62) 32%, rgba(5,5,5,.18) 55%, rgba(5,5,5,0) 74%),
-      linear-gradient(180deg, rgba(5,5,5,.65) 0%, rgba(5,5,5,0) 22%, rgba(5,5,5,0) 74%, rgba(5,5,5,.55) 100%),
-      rgba(5, 5, 5, .16);
-  }
-
-  .hero-noise {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    opacity: .05;
-    mix-blend-mode: overlay;
-    background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="n"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23n)"/%3E%3C/svg%3E');
-  }
-
-  /* ---- editorial frame ------------------------------------------ */
 
   .hero-frame {
     position: absolute;
@@ -136,30 +111,81 @@
   .hero-frame::before { top: -1px; left: -1px; border-top: 1px solid rgba(247,244,238,.55); border-left: 1px solid rgba(247,244,238,.55); }
   .hero-frame::after  { bottom: -1px; right: -1px; border-bottom: 1px solid rgba(247,244,238,.55); border-right: 1px solid rgba(247,244,238,.55); }
 
-  .hero-side-label {
+  /* Dissolves the hero into the Florasis section's ink-950 background
+     instead of cutting to it — also gives the scroll cue and index
+     panel, which both sit low in the frame, a darker floor to read on. */
+  .hero-bottom-fade {
     position: absolute;
-    right: 30px;
-    top: 50%;
+    inset: auto 0 0 0;
     z-index: 6;
-    display: none;
-    writing-mode: vertical-rl;
-    transform: translateY(-50%) rotate(180deg);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: .32em;
-    text-transform: uppercase;
-    color: rgba(247, 244, 238, .4);
+    height: clamp(220px, 32vh, 440px);
+    background: linear-gradient(to bottom, transparent 0%, rgba(5,5,5,.5) 60%, var(--ink-950) 100%);
+    pointer-events: none;
   }
 
-  @media (min-width: 900px) {
-    .hero-side-label { display: block; }
+  /* ---- giant background wordmark + floating product, exactly the
+     design system's hero recipe: the logo sits centered and huge behind
+     the product, which floats in front slightly off-center (its visual
+     mass — the dense lipstick body versus the thin dangling charm — sits
+     a little right of its own bounding box, hence the -53% nudge). ---- */
+
+  html.js .hero-logo-mark,
+  html.js .hero-product { opacity: 0; }
+
+  .hero-logo-mark {
+    position: absolute;
+    left: 50%;
+    top: 44%;
+    z-index: 1;
+    width: clamp(13rem, 60vw, 46rem);
+    max-width: none;
+    transform: translate(-50%, -50%);
+    opacity: .9;
+    pointer-events: none;
+    filter: drop-shadow(0 30px 60px rgba(0,0,0,.4));
   }
 
-  /* ---- nav -------------------------------------------------------- */
+  @media (min-width: 768px) {
+    .hero-logo-mark { top: 50%; }
+  }
+
+  .hero-product {
+    position: absolute;
+    left: 50%;
+    top: 58%;
+    z-index: 2;
+    height: clamp(11rem, 32vh, 26rem);
+    width: auto;
+    max-width: none;
+    aspect-ratio: 758 / 1108;
+    transform: translate(-53%, -50%);
+    pointer-events: none;
+    filter: drop-shadow(0 40px 55px rgba(0,0,0,.6));
+    will-change: transform;
+  }
+
+  @media (min-width: 768px) {
+    .hero-product { top: 54%; height: clamp(16rem, 34vh, 27rem); }
+  }
+
+  /* ---- nav ------------------------------------------------------- */
+
+  /* A soft scrim behind the whole nav row — the video is a bright,
+     busy garden scene rather than the design system's dark hero, so the
+     nav needs this floor of contrast under it regardless of what part
+     of the video sits behind it at any moment. */
+  .hero-nav-scrim {
+    position: absolute;
+    inset: 0 0 auto 0;
+    z-index: 6;
+    height: clamp(120px, 16vh, 200px);
+    background: linear-gradient(to bottom, rgba(5,5,5,.5) 0%, rgba(5,5,5,.22) 55%, transparent 100%);
+    pointer-events: none;
+  }
 
   .hero-nav {
     position: relative;
-    z-index: 10;
+    z-index: 30;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -167,192 +193,287 @@
   }
 
   @media (min-width: 768px) {
-    .hero-nav { padding: 40px 56px 0; }
+    .hero-nav { padding: 38px 40px 0; }
   }
 
   .hero-brand {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
+    display: inline-flex;
+    align-items: center;
+    padding: 11px 20px;
+    border-radius: 999px;
+    background: rgba(5, 5, 5, .38);
+    border: 1px solid rgba(247, 244, 238, .16);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
   }
 
-  .hero-brand-mark {
+  .hero-brand-logo {
+    height: 20px;
+    width: auto;
+    filter: drop-shadow(0 2px 10px rgba(0,0,0,.4));
+  }
+
+  @media (min-width: 768px) {
+    .hero-brand-logo { height: 23px; }
+  }
+
+  .hero-nav-links {
+    display: none;
+    align-items: center;
+    padding: 5px;
+    border-radius: 999px;
+    background: rgba(5, 5, 5, .38);
+    border: 1px solid rgba(247, 244, 238, .16);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  }
+
+  @media (min-width: 860px) {
+    .hero-nav-links { display: flex; }
+  }
+
+  .hero-nav-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: transparent;
+    border: none;
+    color: rgba(247, 244, 238, .8);
     font-size: 13px;
-    letter-spacing: .22em;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .3s ease, color .3s ease;
+  }
+
+  .hero-nav-link:hover { background: rgba(247, 244, 238, .08); color: #fff; }
+
+  .hero-nav-link--current { color: #fff; }
+  .hero-nav-link--current::after {
+    content: '';
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    bottom: 6px;
+    height: 1px;
+    background: rgba(247, 244, 238, .55);
+  }
+
+  .hero-nav-link--cta {
+    background: var(--ivory-50);
+    color: var(--ink-950);
+    font-weight: 600;
+  }
+  .hero-nav-link--cta:hover { background: #fff; color: var(--ink-950); }
+
+  .hero-nav-caret {
+    width: 9px;
+    height: 9px;
+    transition: transform .3s ease;
+  }
+  .hero-nav-link[aria-expanded="true"] .hero-nav-caret { transform: rotate(180deg); }
+
+  /* ---- brands dropdown -------------------------------------------- */
+
+  .hero-nav-item { position: relative; }
+
+  .hero-dropdown {
+    position: absolute;
+    top: calc(100% + 14px);
+    left: 50%;
+    transform: translate(-50%, 8px);
+    width: 17rem;
+    padding: 10px;
+    border-radius: 20px;
+    background: rgba(10, 9, 8, .78);
+    border: 1px solid rgba(247, 244, 238, .14);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 24px 60px rgba(0,0,0,.5);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease, visibility 0s linear .25s;
+  }
+
+  .hero-dropdown.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
+    transition: opacity .25s ease, transform .25s ease;
+  }
+
+  .hero-dropdown-eyebrow {
+    padding: 8px 12px 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: rgba(247, 244, 238, .4);
+  }
+
+  .hero-dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: rgba(247, 244, 238, .5);
+    transition: background .2s ease;
+  }
+
+  .hero-dropdown-item:hover { background: rgba(247, 244, 238, .06); }
+
+  .hero-dropdown-item--active {
+    color: var(--ivory-50);
+    background: rgba(247, 244, 238, .05);
+  }
+
+  .hero-dropdown-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: rgba(247, 244, 238, .35);
+    width: 1.4em;
+  }
+
+  .hero-dropdown-name {
+    flex: 1;
+    font-size: 13px;
     font-weight: 500;
   }
 
-  .hero-brand-sub {
+  .hero-dropdown-tag {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: .25em;
+    font-size: 9px;
+    letter-spacing: .12em;
     text-transform: uppercase;
-    color: rgba(247, 244, 238, .45);
+    padding: 3px 8px;
+    border-radius: 999px;
   }
 
-  .hero-market {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    border-radius: 999px;
-    background: rgba(247, 244, 238, .04);
+  .hero-dropdown-tag--new {
+    background: var(--ivory-50);
+    color: var(--ink-950);
+  }
+
+  .hero-dropdown-tag--soon {
+    background: rgba(247, 244, 238, .08);
+    color: rgba(247, 244, 238, .4);
+  }
+
+  /* ---- floating badge + index panel -------------------------------- */
+
+  .hero-badge {
+    position: absolute;
+    z-index: 10;
+    top: 96px;
+    right: var(--page-margin);
+    display: none;
+    flex-direction: column;
+    gap: 3px;
+    max-width: 13rem;
+    padding: 16px 20px;
+    border-radius: 18px;
+    background: rgba(247, 244, 238, .045);
     border: 1px solid rgba(247, 244, 238, .12);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 20px 50px rgba(0,0,0,.35);
+  }
+
+  @media (min-width: 640px) {
+    .hero-badge { display: flex; top: 112px; right: 40px; }
+  }
+
+  .hero-badge-eyebrow {
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
     letter-spacing: .18em;
     text-transform: uppercase;
-    color: rgba(247, 244, 238, .75);
+    color: rgba(247, 244, 238, .55);
   }
 
-  .hero-market-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 999px;
-    background: var(--ivory-50);
-    animation: florasis-pulse 2.6s ease-in-out infinite;
+  .hero-badge-title {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    color: #fff;
   }
 
-  @keyframes florasis-pulse {
-    0%, 100% { opacity: .5; transform: scale(1); }
-    50%      { opacity: 1;  transform: scale(1.25); }
+  .hero-badge-sub {
+    font-size: 12px;
+    color: rgba(247, 244, 238, .5);
   }
 
-  /* ---- content ------------------------------------------------ */
-
-  .hero-content {
-    position: relative;
+  .hero-index {
+    position: absolute;
     z-index: 10;
-    height: calc(100% - 84px);
+    left: var(--page-margin);
+    bottom: 92px;
     display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: 0 var(--page-margin) 120px;
-    max-width: 46rem;
+    align-items: center;
+    gap: 16px;
   }
 
   @media (min-width: 768px) {
-    .hero-content { padding: 0 56px 96px; height: calc(100% - 120px); }
+    .hero-index { left: 40px; bottom: 100px; }
   }
 
-  .hero-eyebrow {
+  .hero-index-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    border-radius: 14px;
+    background: var(--ivory-50);
+    color: var(--ink-950);
+    text-decoration: none;
+    box-shadow: 0 20px 40px rgba(0,0,0,.4);
+    transition: transform .3s ease;
+  }
+
+  .hero-index-btn:hover { transform: scale(1.06); }
+  .hero-index-btn svg { width: 22px; height: 22px; }
+
+  .hero-index-title {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    color: #fff;
+    text-shadow: 0 2px 16px rgba(0,0,0,.5);
+  }
+
+  .hero-index-sub {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
-    font-weight: 500;
-    letter-spacing: .28em;
+    letter-spacing: .1em;
     text-transform: uppercase;
     color: rgba(247, 244, 238, .55);
-    margin-bottom: 18px;
+    text-shadow: 0 1px 12px rgba(0,0,0,.5);
   }
 
-  html.js .hero-wordmark { opacity: 0; }
-
-  .hero-wordmark {
-    font-family: 'Cinzel', serif;
-    font-weight: 500;
-    font-size: clamp(3rem, 11vw, 8.5rem);
-    line-height: .92;
-    letter-spacing: .01em;
-    color: var(--ivory-50);
-    text-shadow: 0 6px 40px rgba(0,0,0,.45);
-    display: flex;
-    overflow: hidden;
-  }
-
-  .hero-wordmark .letter {
-    display: inline-block;
-    will-change: transform;
-  }
-
-  .hero-subheading {
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-weight: 400;
-    font-size: clamp(1.15rem, 2.4vw, 1.65rem);
-    line-height: 1.5;
-    color: rgba(247, 244, 238, .88);
-    text-shadow: 0 2px 20px rgba(0,0,0,.4);
-    max-width: 30rem;
-    margin-top: 22px;
-  }
-
-  .hero-tagline {
-    margin-top: 20px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: .16em;
-    text-transform: uppercase;
-    color: rgba(247, 244, 238, .62);
-    text-shadow: 0 1px 12px rgba(0,0,0,.4);
-  }
-
-  .hero-shine {
-    background: linear-gradient(115deg, #8a8a8a, #ffffff 45%, #d8d8d8 65%, #8a8a8a);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  .hero-cta {
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-    align-self: flex-start;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 40px;
-    padding: 15px 28px;
-    border-radius: 999px;
-    border: 1px solid rgba(247, 244, 238, .35);
-    background: transparent;
-    color: var(--ivory-50);
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: .04em;
-    text-decoration: none;
-    transition: border-color .35s ease, background .35s ease;
-  }
-
-  .hero-cta:hover { border-color: rgba(247, 244, 238, .7); background: rgba(247, 244, 238, .06); }
-
-  .hero-cta::after {
-    content: '';
-    position: absolute;
-    top: 0; left: -60%;
-    width: 40%; height: 100%;
-    background: linear-gradient(115deg, transparent, rgba(255,255,255,.35), transparent);
-    transform: skewX(-20deg);
-    transition: left .65s cubic-bezier(.4,0,.2,1);
-    pointer-events: none;
-  }
-  .hero-cta:hover::after { left: 130%; }
-
-  .hero-cta svg {
-    width: 15px;
-    height: 15px;
-    transition: transform .35s cubic-bezier(.4,0,.2,1);
-  }
-  .hero-cta:hover svg { transform: translate(2px, -2px); }
-
-  :focus-visible { outline: 1px solid rgba(247, 244, 238, .8); outline-offset: 4px; }
-
-  /* ---- scroll cue ------------------------------------------------ */
+  /* ---- scroll cue -------------------------------------------------- */
 
   .hero-scroll-cue {
     position: absolute;
     left: 50%;
-    bottom: 30px;
+    bottom: 28px;
     z-index: 10;
     transform: translateX(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    color: rgba(247, 244, 238, .4);
+    color: rgba(247, 244, 238, .55);
+    text-shadow: 0 1px 12px rgba(0,0,0,.55);
   }
 
   .hero-scroll-cue span {
@@ -384,7 +505,7 @@
     100% { transform: translateY(220%); }
   }
 
-  /* ---- particles ------------------------------------------------- */
+  /* ---- particles ----------------------------------------------------- */
 
   .hero-particles {
     position: absolute;
@@ -417,6 +538,127 @@
     .hero-scroll-line::after,
     .hero-particle { animation: none; }
   }
+
+  /* ============================================================ */
+  /* INTRO — the brand statement, moved below the hero              */
+  /* ============================================================ */
+
+  .intro {
+    position: relative;
+    overflow: hidden;
+    background: var(--ink-950);
+    padding: 128px var(--page-margin);
+    text-align: center;
+  }
+
+  @media (min-width: 768px) {
+    .intro { padding: 176px 56px; }
+  }
+
+  .intro-noise {
+    position: absolute;
+    inset: 0;
+    opacity: .045;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="n"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23n)"/%3E%3C/svg%3E');
+  }
+
+  .intro-glow {
+    position: absolute;
+    z-index: 0;
+    width: 34rem;
+    height: 34rem;
+    border-radius: 999px;
+    background: rgba(247, 244, 238, .06);
+    filter: blur(120px);
+    pointer-events: none;
+  }
+  .intro-glow--a { top: -8rem; left: -8rem; }
+  .intro-glow--b { bottom: -10rem; right: -8rem; }
+
+  .intro-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 42rem;
+    margin: 0 auto;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    color: rgba(247, 244, 238, .5);
+    margin-bottom: 20px;
+  }
+
+  .intro-logo {
+    height: clamp(6rem, 16vw, 11rem);
+    width: auto;
+    margin: 0 auto;
+    filter: drop-shadow(0 10px 40px rgba(0,0,0,.35));
+  }
+
+  .subheading {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.2rem, 2.4vw, 1.75rem);
+    line-height: 1.5;
+    color: rgba(247, 244, 238, .82);
+    max-width: 32rem;
+    margin: 26px auto 0;
+  }
+
+  .tagline {
+    margin-top: 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: rgba(247, 244, 238, .55);
+  }
+
+  .shine {
+    background: linear-gradient(115deg, #8a8a8a, #ffffff 45%, #d8d8d8 65%, #8a8a8a);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .link-cta {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 44px;
+    color: var(--ivory-50);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .link-cta::after {
+    content: '';
+    position: absolute;
+    left: 0; bottom: -4px;
+    width: 100%; height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform .4s cubic-bezier(.65,0,.35,1);
+  }
+  .link-cta:hover::after { transform: scaleX(1); transform-origin: left; }
+
+  .link-cta svg {
+    width: 14px;
+    height: 14px;
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+  }
+  .link-cta:hover svg { transform: translateX(3px); }
 </style>
 </head>
 <body>
@@ -429,47 +671,123 @@
     </video>
   </div>
 
-  <div class="hero-vignette"></div>
-  <div class="hero-noise"></div>
+  <div class="hero-nav-scrim"></div>
+  <div class="hero-bottom-fade"></div>
   <div class="hero-frame" data-reveal></div>
-  <span class="hero-side-label" data-reveal>Ed. 01 — Lançamento Brasil</span>
+
+  <img class="hero-logo-mark" data-hero-logo src="assets/imgs/KLASME-GROUP-LOGO.png" alt="" aria-hidden="true">
+  <img class="hero-product" data-hero-product src="assets/imgs/batom.webp" alt="Florasis, uma nova marca do portfólio Klasmē Group">
 
   <header class="hero-nav">
-    <div class="hero-brand" data-reveal>
-      <span class="font-display hero-brand-mark">KLASMĒ</span>
-      <span class="hero-brand-sub">Group</span>
-    </div>
-    <div class="hero-market" data-reveal>
-      <span class="hero-market-dot"></span>
-      Florasis × Brasil
-    </div>
+    <a href="#hero-pin" class="hero-brand" data-reveal aria-label="Klasmē Group">
+      <img class="hero-brand-logo" src="assets/imgs/KLASME-GROUP-LOGO.png" alt="Klasmē Group">
+    </a>
+
+    <nav class="hero-nav-links" data-reveal aria-label="Navegação principal">
+      <div class="hero-nav-item">
+        <button type="button" class="hero-nav-link" id="brandsToggle" aria-haspopup="true" aria-expanded="false" aria-controls="brandsMenu">
+          Marcas
+          <svg class="hero-nav-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+
+        <div class="hero-dropdown" id="brandsMenu">
+          <p class="hero-dropdown-eyebrow">Portfólio Klasmē · 8 marcas</p>
+          <a href="#florasis" class="hero-dropdown-item hero-dropdown-item--active">
+            <span class="hero-dropdown-num">01</span>
+            <span class="hero-dropdown-name">Florasis</span>
+            <span class="hero-dropdown-tag hero-dropdown-tag--new">Novo</span>
+          </a>
+          <span class="hero-dropdown-item" aria-disabled="true">
+            <span class="hero-dropdown-num">02</span>
+            <span class="hero-dropdown-name">Marca 02</span>
+            <span class="hero-dropdown-tag hero-dropdown-tag--soon">Em breve</span>
+          </span>
+          <span class="hero-dropdown-item" aria-disabled="true">
+            <span class="hero-dropdown-num">03</span>
+            <span class="hero-dropdown-name">Marca 03</span>
+            <span class="hero-dropdown-tag hero-dropdown-tag--soon">Em breve</span>
+          </span>
+          <span class="hero-dropdown-item" aria-disabled="true">
+            <span class="hero-dropdown-num">04</span>
+            <span class="hero-dropdown-name">Marca 04</span>
+            <span class="hero-dropdown-tag hero-dropdown-tag--soon">Em breve</span>
+          </span>
+          <span class="hero-dropdown-item" aria-disabled="true">
+            <span class="hero-dropdown-num">05</span>
+            <span class="hero-dropdown-name">Marca 05</span>
+            <span class="hero-dropdown-tag hero-dropdown-tag--soon">Em breve</span>
+          </span>
+          <span class="hero-dropdown-item" aria-disabled="true">
+            <span class="hero-dropdown-num">06</span>
+            <span class="hero-dropdown-name">Marca 06</span>
+            <span class="hero-dropdown-tag hero-dropdown-tag--soon">Em breve</span>
+          </span>
+          <span class="hero-dropdown-item" aria-disabled="true">
+            <span class="hero-dropdown-num">07</span>
+            <span class="hero-dropdown-name">Marca 07</span>
+            <span class="hero-dropdown-tag hero-dropdown-tag--soon">Em breve</span>
+          </span>
+          <span class="hero-dropdown-item" aria-disabled="true">
+            <span class="hero-dropdown-num">08</span>
+            <span class="hero-dropdown-name">Marca 08</span>
+            <span class="hero-dropdown-tag hero-dropdown-tag--soon">Em breve</span>
+          </span>
+        </div>
+      </div>
+
+      <a href="#florasis" class="hero-nav-link hero-nav-link--current">Florasis</a>
+      <a href="#" class="hero-nav-link" onclick="return false;">A Klasmē</a>
+      <a href="#" class="hero-nav-link hero-nav-link--cta" onclick="return false;">Contato</a>
+    </nav>
   </header>
 
-  <div class="hero-content">
-    <p class="hero-eyebrow" data-reveal>Klasmē Group apresenta</p>
-
-    <h1 class="hero-wordmark" aria-label="Florasis" data-hero-wordmark>
-      <span class="letter" aria-hidden="true">F</span><span class="letter" aria-hidden="true">l</span><span class="letter" aria-hidden="true">o</span><span class="letter" aria-hidden="true">r</span><span class="letter" aria-hidden="true">a</span><span class="letter" aria-hidden="true">s</span><span class="letter" aria-hidden="true">i</span><span class="letter" aria-hidden="true">s</span>
-    </h1>
-
-    <p class="hero-subheading" data-reveal>
-      A beleza inspirada na natureza e na cultura oriental.
-    </p>
-
-    <p class="hero-tagline" data-reveal>Agora no <span class="hero-shine">Brasil</span></p>
-
-    <a href="#" class="hero-cta" data-reveal id="heroCta">
-      Explorar a chegada
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
-    </a>
+  <div class="hero-badge" data-reveal data-float data-hero-fade>
+    <span class="hero-badge-eyebrow">Marca 01 de 08</span>
+    <span class="hero-badge-title">Florasis</span>
+    <span class="hero-badge-sub">Lançamento · 2026</span>
   </div>
 
-  <div class="hero-scroll-cue" data-reveal>
+  <div class="hero-index" data-reveal data-hero-fade>
+    <a href="#florasis" class="hero-index-btn" aria-label="Ir para a apresentação da Florasis">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+    </a>
+    <div>
+      <p class="hero-index-title">Florasis</p>
+      <p class="hero-index-sub">BR · 2026</p>
+    </div>
+  </div>
+
+  <div class="hero-scroll-cue" data-reveal data-hero-fade>
     <span>Rolar</span>
     <div class="hero-scroll-line"></div>
   </div>
 
   <div class="hero-particles" id="heroParticles"></div>
+</section>
+
+<section id="florasis" class="intro">
+  <div class="intro-glow intro-glow--a"></div>
+  <div class="intro-glow intro-glow--b"></div>
+  <div class="intro-noise"></div>
+
+  <div class="intro-inner">
+    <p class="eyebrow" data-reveal>Klasmē Group apresenta</p>
+
+    <h2>
+      <img class="intro-logo" data-reveal src="assets/imgs/logo-florasis.png" alt="Florasis">
+    </h2>
+
+    <p class="subheading" data-reveal>
+      A beleza inspirada na natureza e na cultura oriental.
+    </p>
+
+    <p class="tagline" data-reveal>Agora no <span class="shine">Brasil</span></p>
+
+    <a href="#hero-pin" class="link-cta" data-reveal>
+      Conhecer o portfólio Klasmē
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+    </a>
+  </div>
 </section>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -481,6 +799,35 @@
 
   if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }
   window.scrollTo(0, 0);
+
+  /* -------------------------------------------------------------- */
+  /* Brands dropdown                                                  */
+  /* -------------------------------------------------------------- */
+  (function brandsDropdown() {
+    const toggle = document.getElementById('brandsToggle');
+    const menu = document.getElementById('brandsMenu');
+
+    function close() {
+      menu.classList.remove('is-open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+    function open() {
+      menu.classList.add('is-open');
+      toggle.setAttribute('aria-expanded', 'true');
+    }
+
+    toggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      menu.classList.contains('is-open') ? close() : open();
+    });
+    document.addEventListener('click', (e) => {
+      if (!menu.contains(e.target) && e.target !== toggle) close();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') close();
+    });
+    menu.querySelectorAll('a').forEach((a) => a.addEventListener('click', close));
+  })();
 
   /* -------------------------------------------------------------- */
   /* Particles — sparse, ambient                                     */
@@ -501,93 +848,109 @@
   })();
 
   /* -------------------------------------------------------------- */
-  /* Entrance timeline                                                */
+  /* Hero entrance — mirrors the design system's own hero timeline:   */
+  /* logo mark and product settle in, then nav/badge/index panel,     */
+  /* then everything that carries data-float hands off into a         */
+  /* continuous loop chained from the exact position entrance left it.*/
   /* -------------------------------------------------------------- */
   const video = document.getElementById('heroVideo');
-  const letters = gsap.utils.toArray('.hero-wordmark .letter');
+  const logoMark = document.querySelector('[data-hero-logo]');
+  const product = document.querySelector('[data-hero-product]');
 
-  function playEntrance() {
+  function playHeroEntrance() {
     gsap.set('[data-reveal]', { autoAlpha: 0, y: 22, filter: 'blur(8px)' });
-    gsap.set('.hero-wordmark', { opacity: 1 });
-    gsap.set(letters, { yPercent: 115 });
+    gsap.set(logoMark, { opacity: 0, scale: .97, filter: 'blur(10px)' });
+    gsap.set(product, { opacity: 0, y: 30, scale: .96, filter: 'blur(14px)' });
     gsap.set(video, { opacity: 0, scale: 1.14 });
-    gsap.set('.hero-media', { clipPath: 'inset(30% 30% 30% 30%)' });
 
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-
-    tl.to('.hero-media', { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.5, ease: 'power4.inOut' }, .1)
-      .to('.hero-frame', { autoAlpha: 1, duration: .8, ease: 'power2.out' }, .3)
-      .to(video, { opacity: 1, duration: 1.4, ease: 'power2.out' }, .25)
-      .to(video, { scale: 1, duration: 2.6, ease: 'power3.out' }, .25)
-      .to('.hero-brand, .hero-market, .hero-side-label', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .9, stagger: .08 }, .9)
-      .to('.hero-eyebrow', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .8 }, 1.05)
-      .to(letters, { yPercent: 0, duration: 1.1, stagger: .045, ease: 'power4.out' }, 1.2)
-      .to('.hero-subheading', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .9 }, 1.75)
-      .to('.hero-tagline', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .8 }, 1.95)
-      .to('.hero-cta', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .8 }, 2.1)
-      .to('.hero-scroll-cue', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .8 }, 2.35)
-      .call(buildScrollNarrative);
+    const hero = gsap.timeline({ defaults: { ease: 'power2.out' } });
+    hero
+      .to(video, { opacity: 1, duration: 1.5 }, .1)
+      .to(video, { scale: 1, duration: 2.6, ease: 'power3.out' }, .1)
+      .to('.hero-frame', { autoAlpha: 1, duration: .8 }, .3)
+      .to(logoMark, { opacity: .9, scale: 1, filter: 'blur(0px)', duration: .6 }, .55)
+      .to(product, { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: .55 }, .85)
+      .to('.hero-brand, .hero-nav-links', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .5, stagger: .06 }, 1.1)
+      .to('.hero-badge, .hero-index, .hero-scroll-cue', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .5, stagger: .08 }, 1.3)
+      .call(buildPinCrossfade)
+      .to(product, { y: -18, rotate: 1, ease: 'sine.inOut', repeat: -1, yoyo: true, duration: 4.5 }, 'float')
+      .to('.hero-badge', { y: -14, ease: 'sine.inOut', repeat: -1, yoyo: true, duration: 4.2 }, 'float');
   }
 
   /* -------------------------------------------------------------- */
-  /* Scroll-linked narrative — the hero pins briefly and settles      */
-  /* into a quieter closing frame instead of unpinning abruptly.      */
+  /* Pinned scroll narrative — the hero holds briefly while the       */
+  /* product dissolves away and the KLASMĒ mark behind it grows into  */
+  /* the foreground, then releases into the Florasis section.         */
   /* -------------------------------------------------------------- */
   let heroPinTrigger = null;
+  let crossfadeTimeline = null;
 
-  function buildScrollNarrative() {
-    if (reduceMotion) return;
-
-    ScrollTrigger.matchMedia({
-      '(min-width: 768px)': createPin.bind(null, '55%'),
-      '(max-width: 767px)': createPin.bind(null, '32%')
-    });
+  function buildPinCrossfade() {
+    crossfadeTimeline = gsap.timeline({ paused: true })
+      .to('[data-hero-fade]', { autoAlpha: 0, ease: 'none' }, 0)
+      .to(product, { autoAlpha: 0, scale: .8, yPercent: -30, filter: 'blur(12px)', ease: 'none' }, .05)
+      .to(logoMark, { scale: 1.1, ease: 'none' }, 0);
+    crossfadeTimeline.progress(heroPinTrigger ? heroPinTrigger.progress : 0);
   }
 
-  function createPin(distance) {
-    const crossfade = gsap.timeline({ paused: true })
-      .to(video, { scale: 1.1, ease: 'none' }, 0)
-      .to('.hero-vignette', { autoAlpha: 1.15, ease: 'none' }, 0)
-      .to('.hero-brand, .hero-market, .hero-eyebrow, .hero-cta, .hero-scroll-cue', { autoAlpha: 0, y: -14, ease: 'none' }, 0)
-      .to('.hero-wordmark, .hero-subheading, .hero-tagline', { yPercent: -6, ease: 'none' }, 0);
-
+  function createHeroPin(distance) {
     heroPinTrigger = ScrollTrigger.create({
       trigger: '#hero-pin',
       start: 'top top',
       end: '+=' + distance,
       pin: true,
       anticipatePin: 1,
-      onUpdate(self) { crossfade.progress(self.progress); }
+      onUpdate(self) { if (crossfadeTimeline) crossfadeTimeline.progress(self.progress); }
+    });
+  }
+
+  if (!reduceMotion) {
+    ScrollTrigger.matchMedia({
+      '(min-width: 768px)': () => createHeroPin('55%'),
+      '(max-width: 767px)': () => createHeroPin('30%')
     });
   }
 
   /* -------------------------------------------------------------- */
-  /* CTA — smooth-scrolls through the pinned narrative                */
+  /* Florasis section — the standard scroll reveal used for every     */
+  /* non-hero section, plus a slightly grander entrance for the logo. */
   /* -------------------------------------------------------------- */
-  document.getElementById('heroCta').addEventListener('click', (e) => {
-    e.preventDefault();
-    const targetY = heroPinTrigger ? heroPinTrigger.end : document.body.scrollHeight;
-    window.scrollTo({ top: targetY, behavior: reduceMotion ? 'auto' : 'smooth' });
-  });
+  function playIntroReveal() {
+    gsap.set('#florasis .intro-logo', { scale: .92, filter: 'blur(10px)' });
+
+    gsap.timeline({
+      scrollTrigger: { trigger: '#florasis', start: 'top 75%', once: true },
+      defaults: { ease: 'power3.out' }
+    })
+      .to('#florasis .eyebrow', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .9 })
+      .to('#florasis .intro-logo', { autoAlpha: 1, scale: 1, filter: 'blur(0px)', duration: 1.1, ease: 'power4.out' }, .15)
+      .to('#florasis .subheading', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .9 }, .55)
+      .to('#florasis .tagline', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .8 }, .7)
+      .to('#florasis .link-cta', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .8 }, .85);
+  }
 
   /* -------------------------------------------------------------- */
-  /* Magnetic hover — CTA only, the system's signature tactile cue    */
+  /* Magnetic hover — every button/link gets the system's tactile cue */
   /* -------------------------------------------------------------- */
   if (!reduceMotion) {
-    const cta = document.getElementById('heroCta');
-    cta.addEventListener('mouseenter', () => gsap.to(cta, { scale: 1.035, duration: .25, ease: 'power2.out' }));
-    cta.addEventListener('mouseleave', () => gsap.to(cta, { scale: 1, duration: .25, ease: 'power2.out' }));
+    gsap.utils.toArray('a, button').forEach((el) => {
+      el.addEventListener('mouseenter', () => gsap.to(el, { scale: 1.035, duration: .25, ease: 'power2.out' }));
+      el.addEventListener('mouseleave', () => gsap.to(el, { scale: 1, duration: .25, ease: 'power2.out' }));
+    });
   }
 
   window.addEventListener('load', () => {
     window.scrollTo(0, 0);
+
     if (reduceMotion) {
       gsap.set('[data-reveal]', { autoAlpha: 1, y: 0, filter: 'blur(0px)' });
-      gsap.set('.hero-wordmark', { opacity: 1 });
-      gsap.set(letters, { yPercent: 0 });
+      gsap.set('#florasis .intro-logo', { scale: 1, filter: 'blur(0px)' });
+      gsap.set(logoMark, { opacity: .9, scale: 1, filter: 'blur(0px)' });
+      gsap.set(product, { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' });
       gsap.set(video, { opacity: 1, scale: 1 });
     } else {
-      playEntrance();
+      playHeroEntrance();
+      playIntroReveal();
     }
     ScrollTrigger.refresh();
   });
