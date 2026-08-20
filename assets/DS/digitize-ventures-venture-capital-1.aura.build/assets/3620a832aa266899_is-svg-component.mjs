@@ -1,3 +1,0 @@
-/* esm.sh - framer-motion@13.1.0/dist/es/render/dom/utils/is-svg-component */
-var t=["animate","circle","defs","desc","ellipse","g","image","line","filter","marker","mask","metadata","path","pattern","polygon","polyline","rect","stop","switch","symbol","svg","text","tspan","use","view"];function i(e){return typeof e!="string"||e.includes("-")?!1:!!(t.indexOf(e)>-1||/[A-Z]/u.test(e))}export{i as isSVGComponent};
-//# sourceMappingURL=is-svg-component.mjs.map

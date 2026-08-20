@@ -1,3 +1,0 @@
-/* esm.sh - framer-motion@13.1.0/dist/es/render/components/motion/feature-bundle */
-import{animations as o}from"../../../motion/features/animations.mjs";import{drag as r}from"../../../motion/features/drag.mjs";import{gestureAnimations as t}from"../../../motion/features/gestures.mjs";import{layout as m}from"../../../motion/features/layout.mjs";var f={...o,...t,...r,...m};export{f as featureBundle};
-//# sourceMappingURL=feature-bundle.mjs.map

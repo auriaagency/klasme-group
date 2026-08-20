@@ -1,3 +1,0 @@
-/* esm.sh - framer-motion@13.1.0/dist/es/components/AnimatePresence/use-presence */
-"use client";import{useContext as u,useId as l,useEffect as c,useCallback as m}from"react";import{PresenceContext as o}from"../../context/PresenceContext.mjs";function x(e=!0){let r=u(o);if(r===null)return[!0,null];let{isPresent:s,onExitComplete:t,register:f}=r,n=l();c(()=>{if(e)return f(n)},[e]);let i=m(()=>e&&t&&t(n),[n,t,e]);return!s&&t?[!1,i]:[!0]}function C(){return P(u(o))}function P(e){return e===null?!0:e.isPresent}export{P as isPresent,C as useIsPresent,x as usePresence};
-//# sourceMappingURL=use-presence.mjs.map

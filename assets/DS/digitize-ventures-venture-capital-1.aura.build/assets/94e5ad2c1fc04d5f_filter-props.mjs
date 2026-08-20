@@ -1,3 +1,0 @@
-/* esm.sh - framer-motion@13.1.0/dist/es/render/dom/utils/filter-props */
-import{isMotionValue as u}from"/motion-dom@^13.0.0?target=es2022";import{isValidMotionProp as i}from"../../../motion/utils/valid-prop.mjs";function a(t,r){return t.startsWith("on")?!i(t):r?.(t)??!i(t)}function c(t,r,e,f){let n={};for(let o in t)o==="values"&&typeof t.values=="object"||u(t[o])||(a(o,f)||e===!0&&i(o)||!r&&!i(o)||t.draggable&&o.startsWith("onDrag"))&&(n[o]=t[o]);return n}export{c as filterProps};
-//# sourceMappingURL=filter-props.mjs.map

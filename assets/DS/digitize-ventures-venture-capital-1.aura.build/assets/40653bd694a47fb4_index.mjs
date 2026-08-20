@@ -1,3 +1,0 @@
-/* esm.sh - framer-motion@13.1.0/dist/es/render/dom/viewport/index */
-import{resolveElements as d}from"/motion-dom@^13.0.0?target=es2022";var m={some:0,all:1};function v(i,f,{root:a,margin:l,amount:t="some"}={}){let g=d(i),n=new WeakMap,h=s=>{s.forEach(e=>{let r=n.get(e.target);if(e.isIntersecting!==!!r)if(e.isIntersecting){let c=f(e.target,e);typeof c=="function"?n.set(e.target,c):o.unobserve(e.target)}else typeof r=="function"&&(r(e),n.delete(e.target))})},o=new IntersectionObserver(h,{root:a,rootMargin:l,threshold:typeof t=="number"?t:m[t]});return g.forEach(s=>o.observe(s)),()=>o.disconnect()}export{v as inView};
-//# sourceMappingURL=index.mjs.map

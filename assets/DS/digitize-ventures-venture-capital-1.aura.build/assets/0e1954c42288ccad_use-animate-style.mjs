@@ -1,3 +1,0 @@
-/* esm.sh - framer-motion@13.1.0/dist/es/animation/hooks/use-animate-style */
-"use client";import{useConstant as n}from"../../utils/use-constant.mjs";import{useUnmountEffect as i}from"../../utils/use-unmount-effect.mjs";import{createScopedWaapiAnimate as a}from"../animators/waapi/animate-style.mjs";function c(){let t=n(()=>({current:null,animations:[]})),o=n(()=>a(t));return i(()=>{t.animations.forEach(e=>e.stop())}),[t,o]}export{c as useAnimateMini};
-//# sourceMappingURL=use-animate-style.mjs.map
