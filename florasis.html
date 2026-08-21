@@ -10,6 +10,14 @@
   document.documentElement.classList.add('js');
   if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }
   window.scrollTo(0, 0);
+
+  // Holds the visitor at the top until the hero's entrance finishes
+  // playing — released explicitly once the animation completes, with a
+  // hard timeout as a safety net in case a script fails to load.
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.documentElement.classList.add('scroll-locked');
+    setTimeout(() => document.documentElement.classList.remove('scroll-locked'), 6000);
+  }
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,6 +36,13 @@
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   html, body { height: 100%; }
+
+  /* Scroll lock during the hero's entrance — removed once it finishes
+     (see the inline head script and playHeroEntrance below). */
+  html.scroll-locked {
+    overflow: hidden;
+    touch-action: none;
+  }
 
   body {
     background: var(--ink-950);
@@ -137,10 +152,10 @@
     left: 50%;
     top: 44%;
     z-index: 1;
-    width: clamp(13rem, 60vw, 46rem);
+    width: clamp(11rem, 34vw, 27rem);
     max-width: none;
     transform: translate(-50%, -50%);
-    opacity: .9;
+    opacity: .85;
     pointer-events: none;
     filter: drop-shadow(0 30px 60px rgba(0,0,0,.4));
   }
@@ -149,23 +164,27 @@
     .hero-logo-mark { top: 50%; }
   }
 
+  /* No static transform here on purpose — GSAP animates y/yPercent/rotate
+     on this element (entrance rise, float loop, pin crossfade), and a
+     percentage-based CSS transform fights GSAP's own transform cache the
+     same way it did on the hero letters: it freezes mid-tween instead of
+     animating. The -53%/-50% centering is set once via gsap.set instead. */
   .hero-product {
     position: absolute;
     left: 50%;
-    top: 58%;
+    top: 44%;
     z-index: 2;
-    height: clamp(11rem, 32vh, 26rem);
+    height: clamp(14rem, 42vh, 32rem);
     width: auto;
     max-width: none;
     aspect-ratio: 758 / 1108;
-    transform: translate(-53%, -50%);
     pointer-events: none;
     filter: drop-shadow(0 40px 55px rgba(0,0,0,.6));
     will-change: transform;
   }
 
   @media (min-width: 768px) {
-    .hero-product { top: 54%; height: clamp(16rem, 34vh, 27rem); }
+    .hero-product { top: 50%; height: clamp(20rem, 46vh, 34rem); }
   }
 
   /* ---- nav ------------------------------------------------------- */
@@ -546,8 +565,13 @@
   .intro {
     position: relative;
     overflow: hidden;
+    isolation: isolate;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: var(--ink-950);
-    padding: 128px var(--page-margin);
+    padding: 148px var(--page-margin);
     text-align: center;
   }
 
@@ -574,8 +598,40 @@
     filter: blur(120px);
     pointer-events: none;
   }
-  .intro-glow--a { top: -8rem; left: -8rem; }
-  .intro-glow--b { bottom: -10rem; right: -8rem; }
+  .intro-glow--a { top: -8rem; left: -8rem; animation: florasis-drift-a 18s ease-in-out infinite; }
+  .intro-glow--b { bottom: -10rem; right: -8rem; animation: florasis-drift-b 22s ease-in-out infinite; }
+
+  @keyframes florasis-drift-a {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: .6; }
+    50%      { transform: translate(5%, -6%) scale(1.15); opacity: .9; }
+  }
+  @keyframes florasis-drift-b {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: .5; }
+    50%      { transform: translate(-6%, 5%) scale(1.12); opacity: .8; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .intro-glow--a, .intro-glow--b { animation: none; }
+  }
+
+  .intro-side-label {
+    position: absolute;
+    left: 28px;
+    bottom: 56px;
+    z-index: 1;
+    display: none;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .32em;
+    text-transform: uppercase;
+    color: rgba(247, 244, 238, .3);
+  }
+
+  @media (min-width: 1024px) {
+    .intro-side-label { display: block; }
+  }
 
   .intro-inner {
     position: relative;
@@ -585,13 +641,20 @@
   }
 
   .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(247, 244, 238, .18);
+    background: rgba(247, 244, 238, .03);
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
     font-weight: 500;
-    letter-spacing: .28em;
+    letter-spacing: .22em;
     text-transform: uppercase;
-    color: rgba(247, 244, 238, .5);
-    margin-bottom: 20px;
+    color: rgba(247, 244, 238, .6);
+    margin-bottom: 32px;
   }
 
   .intro-logo {
@@ -629,36 +692,50 @@
     color: transparent;
   }
 
-  .link-cta {
+  /* Same recipe as the hero's own CTA: pill, dark glass, a diagonal
+     shine sweeping through on hover — the system's signature button. */
+  .intro-cta {
     position: relative;
+    isolation: isolate;
+    overflow: hidden;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    margin-top: 44px;
+    gap: 10px;
+    margin-top: 48px;
+    padding: 15px 28px;
+    border-radius: 999px;
+    border: 1px solid rgba(247, 244, 238, .3);
+    background: rgba(247, 244, 238, .04);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     color: var(--ivory-50);
     font-size: 13px;
     font-weight: 600;
+    letter-spacing: .02em;
     text-decoration: none;
+    transition: border-color .35s ease, background .35s ease;
   }
 
-  .link-cta::after {
+  .intro-cta:hover { border-color: rgba(247, 244, 238, .55); background: rgba(247, 244, 238, .08); }
+
+  .intro-cta::after {
     content: '';
     position: absolute;
-    left: 0; bottom: -4px;
-    width: 100%; height: 1px;
-    background: currentColor;
-    transform: scaleX(0);
-    transform-origin: right;
-    transition: transform .4s cubic-bezier(.65,0,.35,1);
+    top: 0; left: -60%;
+    width: 40%; height: 100%;
+    background: linear-gradient(115deg, transparent, rgba(255,255,255,.35), transparent);
+    transform: skewX(-20deg);
+    transition: left .65s cubic-bezier(.4,0,.2,1);
+    pointer-events: none;
   }
-  .link-cta:hover::after { transform: scaleX(1); transform-origin: left; }
+  .intro-cta:hover::after { left: 130%; }
 
-  .link-cta svg {
+  .intro-cta svg {
     width: 14px;
     height: 14px;
     transition: transform .3s cubic-bezier(.4,0,.2,1);
   }
-  .link-cta:hover svg { transform: translateX(3px); }
+  .intro-cta:hover svg { transform: translate(2px, -2px); }
 </style>
 </head>
 <body>
@@ -675,7 +752,7 @@
   <div class="hero-bottom-fade"></div>
   <div class="hero-frame" data-reveal></div>
 
-  <img class="hero-logo-mark" data-hero-logo src="assets/imgs/KLASME-GROUP-LOGO.png" alt="" aria-hidden="true">
+  <img class="hero-logo-mark" data-hero-logo src="assets/imgs/logo-florasis.png" alt="" aria-hidden="true">
   <img class="hero-product" data-hero-product src="assets/imgs/batom.webp" alt="Florasis, uma nova marca do portfólio Klasmē Group">
 
   <header class="hero-nav">
@@ -766,9 +843,11 @@
 </section>
 
 <section id="florasis" class="intro">
-  <div class="intro-glow intro-glow--a"></div>
-  <div class="intro-glow intro-glow--b"></div>
+  <div class="intro-glow intro-glow--a" data-parallax data-speed="-0.12"></div>
+  <div class="intro-glow intro-glow--b" data-parallax data-speed="0.14"></div>
   <div class="intro-noise"></div>
+  <div class="hero-frame" data-reveal></div>
+  <span class="intro-side-label" data-reveal>Florasis · BR 2026</span>
 
   <div class="intro-inner">
     <p class="eyebrow" data-reveal>Klasmē Group apresenta</p>
@@ -783,11 +862,13 @@
 
     <p class="tagline" data-reveal>Agora no <span class="shine">Brasil</span></p>
 
-    <a href="#hero-pin" class="link-cta" data-reveal>
+    <a href="#hero-pin" class="intro-cta" data-reveal>
       Conhecer o portfólio Klasmē
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
     </a>
   </div>
+
+  <div class="hero-particles" id="introParticles"></div>
 </section>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -830,12 +911,13 @@
   })();
 
   /* -------------------------------------------------------------- */
-  /* Particles — sparse, ambient                                     */
+  /* Particles — sparse, ambient, seeded into both the hero and the   */
+  /* Florasis section                                                 */
   /* -------------------------------------------------------------- */
-  (function seedParticles() {
+  function seedParticles(containerId, count) {
     if (reduceMotion) return;
-    const wrap = document.getElementById('heroParticles');
-    const count = 14;
+    const wrap = document.getElementById(containerId);
+    if (!wrap) return;
     for (let i = 0; i < count; i++) {
       const p = document.createElement('span');
       p.className = 'hero-particle';
@@ -845,7 +927,30 @@
       p.style.animationDelay = (Math.random() * 16) + 's';
       wrap.appendChild(p);
     }
-  })();
+  }
+  seedParticles('heroParticles', 14);
+  seedParticles('introParticles', 10);
+
+  /* -------------------------------------------------------------- */
+  /* Ambient parallax — decorative glow layers drift at their own      */
+  /* speed as the page scrolls, the same data-parallax / data-speed    */
+  /* convention the design system uses on every non-hero section.      */
+  /* -------------------------------------------------------------- */
+  if (!reduceMotion) {
+    gsap.utils.toArray('[data-parallax]').forEach((layer) => {
+      const speed = Number(layer.dataset.speed || .1);
+      gsap.to(layer, {
+        yPercent: speed * 100,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: layer.closest('section'),
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 1.2
+        }
+      });
+    });
+  }
 
   /* -------------------------------------------------------------- */
   /* Hero entrance — mirrors the design system's own hero timeline:   */
@@ -857,10 +962,14 @@
   const logoMark = document.querySelector('[data-hero-logo]');
   const product = document.querySelector('[data-hero-product]');
 
+  function unlockScroll() {
+    document.documentElement.classList.remove('scroll-locked');
+  }
+
   function playHeroEntrance() {
     gsap.set('[data-reveal]', { autoAlpha: 0, y: 22, filter: 'blur(8px)' });
     gsap.set(logoMark, { opacity: 0, scale: .97, filter: 'blur(10px)' });
-    gsap.set(product, { opacity: 0, y: 30, scale: .96, filter: 'blur(14px)' });
+    gsap.set(product, { xPercent: -53, yPercent: -50, opacity: 0, y: 30, scale: .96, filter: 'blur(14px)' });
     gsap.set(video, { opacity: 0, scale: 1.14 });
 
     const hero = gsap.timeline({ defaults: { ease: 'power2.out' } });
@@ -872,6 +981,7 @@
       .to(product, { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: .55 }, .85)
       .to('.hero-brand, .hero-nav-links', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .5, stagger: .06 }, 1.1)
       .to('.hero-badge, .hero-index, .hero-scroll-cue', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .5, stagger: .08 }, 1.3)
+      .call(unlockScroll)
       .call(buildPinCrossfade)
       .to(product, { y: -18, rotate: 1, ease: 'sine.inOut', repeat: -1, yoyo: true, duration: 4.5 }, 'float')
       .to('.hero-badge', { y: -14, ease: 'sine.inOut', repeat: -1, yoyo: true, duration: 4.2 }, 'float');
@@ -879,7 +989,7 @@
 
   /* -------------------------------------------------------------- */
   /* Pinned scroll narrative — the hero holds briefly while the       */
-  /* product dissolves away and the KLASMĒ mark behind it grows into  */
+  /* product dissolves away and the Florasis mark behind it grows into*/
   /* the foreground, then releases into the Florasis section.         */
   /* -------------------------------------------------------------- */
   let heroPinTrigger = null;
@@ -888,7 +998,7 @@
   function buildPinCrossfade() {
     crossfadeTimeline = gsap.timeline({ paused: true })
       .to('[data-hero-fade]', { autoAlpha: 0, ease: 'none' }, 0)
-      .to(product, { autoAlpha: 0, scale: .8, yPercent: -30, filter: 'blur(12px)', ease: 'none' }, .05)
+      .to(product, { autoAlpha: 0, scale: .8, yPercent: -80, filter: 'blur(12px)', ease: 'none' }, .05)
       .to(logoMark, { scale: 1.1, ease: 'none' }, 0);
     crossfadeTimeline.progress(heroPinTrigger ? heroPinTrigger.progress : 0);
   }
@@ -922,11 +1032,12 @@
       scrollTrigger: { trigger: '#florasis', start: 'top 75%', once: true },
       defaults: { ease: 'power3.out' }
     })
-      .to('#florasis .eyebrow', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .9 })
-      .to('#florasis .intro-logo', { autoAlpha: 1, scale: 1, filter: 'blur(0px)', duration: 1.1, ease: 'power4.out' }, .15)
-      .to('#florasis .subheading', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .9 }, .55)
-      .to('#florasis .tagline', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .8 }, .7)
-      .to('#florasis .link-cta', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .8 }, .85);
+      .to('#florasis .hero-frame, #florasis .intro-side-label', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .8 })
+      .to('#florasis .eyebrow', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .9 }, .1)
+      .to('#florasis .intro-logo', { autoAlpha: 1, scale: 1, filter: 'blur(0px)', duration: 1.1, ease: 'power4.out' }, .25)
+      .to('#florasis .subheading', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .9 }, .65)
+      .to('#florasis .tagline', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .8 }, .8)
+      .to('#florasis .intro-cta', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .8 }, .95);
   }
 
   /* -------------------------------------------------------------- */
@@ -943,10 +1054,11 @@
     window.scrollTo(0, 0);
 
     if (reduceMotion) {
+      unlockScroll();
       gsap.set('[data-reveal]', { autoAlpha: 1, y: 0, filter: 'blur(0px)' });
       gsap.set('#florasis .intro-logo', { scale: 1, filter: 'blur(0px)' });
       gsap.set(logoMark, { opacity: .9, scale: 1, filter: 'blur(0px)' });
-      gsap.set(product, { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' });
+      gsap.set(product, { xPercent: -53, yPercent: -50, opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' });
       gsap.set(video, { opacity: 1, scale: 1 });
     } else {
       playHeroEntrance();
