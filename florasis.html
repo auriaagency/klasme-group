@@ -17,6 +17,19 @@
   if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     document.documentElement.classList.add('scroll-locked');
     setTimeout(() => document.documentElement.classList.remove('scroll-locked'), 6000);
+
+    // Belt-and-suspenders on top of the CSS overflow lock: some engines
+    // (WebKit in particular) can still let an early scroll gesture, a
+    // focus jump, or a restored position slip through overflow:hidden in
+    // edge cases. As long as the lock class is present, any scroll that
+    // does happen anyway gets snapped straight back to 0 — so the very
+    // first thing a visitor can ever see rendered is the hero, never a
+    // frame of whatever sits further down the page.
+    window.addEventListener('scroll', () => {
+      if (document.documentElement.classList.contains('scroll-locked') && window.scrollY !== 0) {
+        window.scrollTo(0, 0);
+      }
+    }, { passive: true });
   }
 </script>
 
@@ -37,11 +50,28 @@
 
   html, body { height: 100%; }
 
+  /* Reserves the scrollbar's track at all times, locked or not, so the
+     viewport's available width never changes the instant scroll unlocks
+     (unlocking makes the ~3000px-tall page scrollable, and on platforms
+     with a non-overlay scrollbar that appears immediately and narrows
+     the viewport by its own width). Without this, that one-frame width
+     change could leave the hero video's compositor layer — already
+     playing, already sized to the wider pre-scrollbar viewport — a
+     sliver behind on the next repaint, showing as a thin black edge. */
+  html { scrollbar-gutter: stable; }
+
   /* Scroll lock during the hero's entrance — removed once it finishes
-     (see the inline head script and playHeroEntrance below). */
-  html.scroll-locked {
+     (see the inline head script and playHeroEntrance below). Locks both
+     html AND body: Safari/WebKit's choice of "scrolling element" doesn't
+     always follow html's overflow the way Chromium's does, so overflow
+     alone on just one of the two has been seen to leave the other still
+     scrollable there. */
+  html.scroll-locked,
+  html.scroll-locked body {
     overflow: hidden;
+    height: 100%;
     touch-action: none;
+    overscroll-behavior: none;
   }
 
   body {
@@ -89,6 +119,12 @@
       linear-gradient(160deg, #14110d 0%, #050505 55%, #0a0806 100%);
   }
 
+  /* Plain background video — no poster, no fade/zoom entrance. Both were
+     tried and both backfired: a <video poster> swaps to a black frame
+     the instant autoplay starts painting real ones; a static <img>
+     poster crossfading underneath ghosted visibly against the actual
+     video, since it froze one moment while the video played from its
+     own different starting frame. Simplest is the fix — it just plays. */
   .hero-video {
     position: absolute;
     inset: 0;
@@ -96,8 +132,6 @@
     height: 100%;
     object-fit: cover;
     object-position: 50% 38%;
-    transform: scale(1.08);
-    opacity: 0;
   }
 
   @media (max-width: 767px) {
@@ -566,17 +600,13 @@
     position: relative;
     overflow: hidden;
     isolation: isolate;
-    min-height: 100svh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     background: var(--ink-950);
-    padding: 148px var(--page-margin);
+    padding: 148px var(--page-margin) 0;
     text-align: center;
   }
 
   @media (min-width: 768px) {
-    .intro { padding: 176px 56px; }
+    .intro { padding: 176px 56px 0; }
   }
 
   .intro-noise {
@@ -658,21 +688,224 @@
   }
 
   .intro-logo {
-    height: clamp(6rem, 16vw, 11rem);
+    height: clamp(4.5rem, 11vw, 7rem);
     width: auto;
     margin: 0 auto;
     filter: drop-shadow(0 10px 40px rgba(0,0,0,.35));
+  }
+
+  .intro-mission {
+    font-family: 'Cinzel', serif;
+    font-weight: 500;
+    font-size: clamp(1.5rem, 3.4vw, 2.5rem);
+    line-height: 1.25;
+    color: var(--ivory-50);
+    max-width: 30rem;
+    margin: 30px auto 0;
+  }
+
+  /* ---- two-column spread: story on the left, facts + pillars on the
+     right — an editorial layout instead of one long stacked column. --- */
+
+  .intro-columns {
+    position: relative;
+    z-index: 1;
+    max-width: 68rem;
+    margin: 72px auto 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 56px;
+    text-align: left;
+  }
+
+  @media (min-width: 900px) {
+    .intro-columns { grid-template-columns: 1fr 1fr; gap: 72px; margin-top: 100px; }
+  }
+
+  .intro-col-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    color: rgba(247, 244, 238, .4);
+    margin-bottom: 18px;
   }
 
   .subheading {
     font-family: 'Cormorant Garamond', serif;
     font-style: italic;
     font-weight: 400;
-    font-size: clamp(1.2rem, 2.4vw, 1.75rem);
+    font-size: clamp(1.2rem, 2vw, 1.55rem);
     line-height: 1.5;
-    color: rgba(247, 244, 238, .82);
-    max-width: 32rem;
-    margin: 26px auto 0;
+    color: rgba(247, 244, 238, .85);
+  }
+
+  .intro-lede {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: clamp(.95rem, 1.2vw, 1.02rem);
+    line-height: 1.75;
+    color: rgba(247, 244, 238, .55);
+    margin-top: 20px;
+  }
+
+  .intro-meaning {
+    margin-top: 24px;
+    padding: 18px 22px;
+    border-left: 2px solid rgba(247, 244, 238, .25);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: clamp(.95rem, 1.2vw, 1.05rem);
+    line-height: 1.6;
+    color: rgba(247, 244, 238, .5);
+  }
+
+  .intro-meaning b { color: rgba(247, 244, 238, .75); font-weight: 500; }
+
+  /* ---- stats: 2x2 card grid, right column top ------------------------- */
+
+  .intro-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .intro-stat {
+    position: relative;
+    padding: 20px 18px;
+    border-radius: 14px;
+    border: 1px solid rgba(247, 244, 238, .1);
+    background: rgba(247, 244, 238, .02);
+  }
+
+  .intro-stat-value {
+    font-family: 'Cinzel', serif;
+    font-weight: 500;
+    font-size: clamp(1.35rem, 2.2vw, 1.7rem);
+    color: var(--ivory-50);
+  }
+
+  .intro-stat-label {
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: rgba(247, 244, 238, .45);
+  }
+
+  /* ---- pillars: horizontal cards stacked below the stats --------------- */
+
+  .intro-pillars {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .intro-pillar {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px 20px;
+    border-radius: 14px;
+    border: 1px solid rgba(247, 244, 238, .1);
+    background: rgba(247, 244, 238, .02);
+    transition: border-color .35s ease, background .35s ease;
+  }
+
+  .intro-pillar:hover {
+    border-color: rgba(247, 244, 238, .22);
+    background: rgba(247, 244, 238, .04);
+  }
+
+  .intro-pillar-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(247, 244, 238, .05);
+    transition: transform .35s cubic-bezier(.4,0,.2,1), background .35s ease;
+  }
+
+  .intro-pillar:hover .intro-pillar-icon {
+    transform: scale(1.1);
+    background: rgba(247, 244, 238, .09);
+  }
+
+  .intro-pillar svg {
+    width: 18px;
+    height: 18px;
+    color: rgba(247, 244, 238, .75);
+  }
+
+  .intro-pillar-title {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    color: var(--ivory-50);
+  }
+
+  .intro-pillar-desc {
+    margin-top: 4px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(247, 244, 238, .5);
+  }
+
+  /* ---- product-line marquee ------------------------------------------- */
+
+  .intro-marquee {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    margin-top: 84px;
+    padding: 22px 0;
+    border-top: 1px solid rgba(247, 244, 238, .1);
+    border-bottom: 1px solid rgba(247, 244, 238, .1);
+    background: rgba(247, 244, 238, .015);
+  }
+
+  @media (min-width: 768px) {
+    .intro-marquee { margin-top: 104px; }
+  }
+
+  .intro-marquee-track {
+    display: flex;
+    width: max-content;
+    align-items: center;
+    gap: 2.5rem;
+    white-space: nowrap;
+    animation: florasis-marquee 34s linear infinite;
+  }
+
+  .intro-marquee:hover .intro-marquee-track { animation-play-state: paused; }
+
+  @keyframes florasis-marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  .intro-marquee-track span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    color: rgba(247, 244, 238, .32);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .intro-marquee-track { animation: none; }
+  }
+
+  .intro-closing {
+    position: relative;
+    z-index: 1;
+    padding: 80px var(--page-margin) 100px;
   }
 
   .tagline {
@@ -856,10 +1089,89 @@
       <img class="intro-logo" data-reveal src="assets/imgs/logo-florasis.png" alt="Florasis">
     </h2>
 
-    <p class="subheading" data-reveal>
-      A beleza inspirada na natureza e na cultura oriental.
-    </p>
+    <p class="intro-mission" data-reveal>Redefinindo a maquiagem como uma forma de arte.</p>
+  </div>
 
+  <div class="intro-columns">
+    <div class="intro-col" data-parallax data-speed="-0.06">
+      <p class="intro-col-label" data-reveal>A marca</p>
+
+      <p class="subheading" data-reveal>
+        A beleza inspirada na natureza e na cultura oriental — nascida às margens do West Lake, em Hangzhou.
+      </p>
+
+      <p class="intro-lede" data-reveal>
+        Fundada em 2017 junto ao lago reverenciado por poetas e pintores chineses há mais de mil anos, a Florasis une maquiagem e skincare em uma só filosofia: honrar os rituais de beleza tradicionais com ciência de ponta e essências florais — da caligrafia aos motivos entalhados em cada embalagem.
+      </p>
+
+      <p class="intro-meaning" data-reveal>
+        <b>Flora</b>, deusa entre as flores, <b>+ sister</b> — natureza e feminilidade em uma só palavra.
+      </p>
+    </div>
+
+    <div class="intro-col" data-parallax data-speed="0.08">
+      <p class="intro-col-label" data-reveal>Em números e princípios</p>
+
+      <div class="intro-stats">
+        <div class="intro-stat" data-reveal>
+          <p class="intro-stat-value">2017</p>
+          <p class="intro-stat-label">Fundação</p>
+        </div>
+        <div class="intro-stat" data-reveal>
+          <p class="intro-stat-value">Hangzhou</p>
+          <p class="intro-stat-label">West Lake, China</p>
+        </div>
+        <div class="intro-stat" data-reveal>
+          <p class="intro-stat-value">170+</p>
+          <p class="intro-stat-label">Patentes registradas</p>
+        </div>
+        <div class="intro-stat" data-reveal>
+          <p class="intro-stat-value">05</p>
+          <p class="intro-stat-label">Centros de P&D</p>
+        </div>
+      </div>
+
+      <div class="intro-pillars">
+        <div class="intro-pillar" data-reveal>
+          <span class="intro-pillar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M4 12h16M12 4v16"/></svg></span>
+          <div>
+            <p class="intro-pillar-title">Tradição</p>
+            <p class="intro-pillar-desc">Cultura chinesa viva em cada produto, original e atemporal.</p>
+          </div>
+        </div>
+        <div class="intro-pillar" data-reveal>
+          <span class="intro-pillar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></span>
+          <div>
+            <p class="intro-pillar-title">Natureza</p>
+            <p class="intro-pillar-desc">Receitas ancestrais e essências florais em vez de atalhos sintéticos.</p>
+          </div>
+        </div>
+        <div class="intro-pillar" data-reveal>
+          <span class="intro-pillar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg></span>
+          <div>
+            <p class="intro-pillar-title">Inovação</p>
+            <p class="intro-pillar-desc">Cinco centros de P&D e mais de 170 patentes em tecnologia de beleza.</p>
+          </div>
+        </div>
+        <div class="intro-pillar" data-reveal>
+          <span class="intro-pillar-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.7 7-6.3-3.9L5.7 21l1.7-7L2 9.2l7.1-.6L12 2Z"/></svg></span>
+          <div>
+            <p class="intro-pillar-title">Excelência</p>
+            <p class="intro-pillar-desc">Cuidado artesanal do conceito à embalagem, sem pressa.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="intro-marquee">
+    <div class="intro-marquee-track">
+      <span>Lotus Radiance &nbsp;·&nbsp; Blooming Rouge &nbsp;·&nbsp; Flawless Jade &nbsp;·&nbsp; Yurong &nbsp;·&nbsp; Embroidery &amp; Nomadic Glam &nbsp;·&nbsp; Herança Chinesa &nbsp;·&nbsp; C-Beauty &nbsp;·&nbsp;</span>
+      <span aria-hidden="true">Lotus Radiance &nbsp;·&nbsp; Blooming Rouge &nbsp;·&nbsp; Flawless Jade &nbsp;·&nbsp; Yurong &nbsp;·&nbsp; Embroidery &amp; Nomadic Glam &nbsp;·&nbsp; Herança Chinesa &nbsp;·&nbsp; C-Beauty &nbsp;·&nbsp;</span>
+    </div>
+  </div>
+
+  <div class="intro-closing">
     <p class="tagline" data-reveal>Agora no <span class="shine">Brasil</span></p>
 
     <a href="#hero-pin" class="intro-cta" data-reveal>
@@ -964,18 +1276,19 @@
 
   function unlockScroll() {
     document.documentElement.classList.remove('scroll-locked');
+    requestAnimationFrame(() => ScrollTrigger.refresh());
   }
 
   function playHeroEntrance() {
     gsap.set('[data-reveal]', { autoAlpha: 0, y: 22, filter: 'blur(8px)' });
     gsap.set(logoMark, { opacity: 0, scale: .97, filter: 'blur(10px)' });
     gsap.set(product, { xPercent: -53, yPercent: -50, opacity: 0, y: 30, scale: .96, filter: 'blur(14px)' });
-    gsap.set(video, { opacity: 0, scale: 1.14 });
+    // Video is intentionally left alone here — its entrance is a plain
+    // CSS animation (see .hero-video) so it isn't gated on GSAP's own
+    // load time. See buildPinCrossfade for its scroll-linked scale.
 
     const hero = gsap.timeline({ defaults: { ease: 'power2.out' } });
     hero
-      .to(video, { opacity: 1, duration: 1.5 }, .1)
-      .to(video, { scale: 1, duration: 2.6, ease: 'power3.out' }, .1)
       .to('.hero-frame', { autoAlpha: 1, duration: .8 }, .3)
       .to(logoMark, { opacity: .9, scale: 1, filter: 'blur(0px)', duration: .6 }, .55)
       .to(product, { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: .55 }, .85)
@@ -983,7 +1296,7 @@
       .to('.hero-badge, .hero-index, .hero-scroll-cue', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .5, stagger: .08 }, 1.3)
       .call(unlockScroll)
       .call(buildPinCrossfade)
-      .to(product, { y: -18, rotate: 1, ease: 'sine.inOut', repeat: -1, yoyo: true, duration: 4.5 }, 'float')
+      .to(product, { y: -26, x: 10, rotate: 1, ease: 'sine.inOut', repeat: -1, yoyo: true, duration: 4.5 }, 'float')
       .to('.hero-badge', { y: -14, ease: 'sine.inOut', repeat: -1, yoyo: true, duration: 4.2 }, 'float');
   }
 
@@ -1035,9 +1348,39 @@
       .to('#florasis .hero-frame, #florasis .intro-side-label', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .8 })
       .to('#florasis .eyebrow', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .9 }, .1)
       .to('#florasis .intro-logo', { autoAlpha: 1, scale: 1, filter: 'blur(0px)', duration: 1.1, ease: 'power4.out' }, .25)
-      .to('#florasis .subheading', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .9 }, .65)
-      .to('#florasis .tagline', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .8 }, .8)
-      .to('#florasis .intro-cta', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .8 }, .95);
+      .to('#florasis .intro-mission', { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .9 }, .6);
+
+    // Each block below the fold gets its own reveal, triggered as it
+    // enters view — the section is now much taller than one screen, so
+    // a single timeline gated on the section's top would fire everything
+    // at once instead of as the visitor actually scrolls to it.
+    [
+      { selector: '.intro-columns', stagger: .07 },
+      { selector: '.intro-closing', stagger: .12 }
+    ].forEach(({ selector, stagger }) => {
+      const items = document.querySelectorAll('#florasis ' + selector + ' [data-reveal]');
+      if (!items.length) return;
+      const tl = gsap.timeline({
+        scrollTrigger: { trigger: '#florasis ' + selector, start: 'top 82%', once: true },
+        defaults: { ease: 'power3.out' }
+      }).to(items, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .9, stagger });
+
+      // A slow, gentle breathing drift on the stat/pillar cards once they've
+      // settled — just enough life to keep the section from feeling static,
+      // each card on its own random offset so they never move in unison.
+      if (selector === '.intro-columns' && !reduceMotion) {
+        tl.call(() => {
+          gsap.to('#florasis .intro-stat, #florasis .intro-pillar', {
+            y: -6,
+            duration: 3.6,
+            ease: 'sine.inOut',
+            repeat: -1,
+            yoyo: true,
+            stagger: { each: .18, from: 'random' }
+          });
+        });
+      }
+    });
   }
 
   /* -------------------------------------------------------------- */
@@ -1050,22 +1393,34 @@
     });
   }
 
-  window.addEventListener('load', () => {
-    window.scrollTo(0, 0);
+  // Runs as soon as this script executes rather than waiting for
+  // window's "load" event — "load" only fires once every last byte of
+  // the page (including the multi-megabyte hero video) has finished
+  // downloading, which on a slow or cold-cache connection can take far
+  // longer than the entrance animation itself. Gating the scroll unlock
+  // on that meant visitors on slower connections hit the 6s safety
+  // timeout with the hero still invisible: scroll unlocked, but nothing
+  // revealed yet. The script tag sits at the end of body, so the DOM is
+  // already parsed by the time this runs — no need to wait further.
+  window.scrollTo(0, 0);
 
-    if (reduceMotion) {
-      unlockScroll();
-      gsap.set('[data-reveal]', { autoAlpha: 1, y: 0, filter: 'blur(0px)' });
-      gsap.set('#florasis .intro-logo', { scale: 1, filter: 'blur(0px)' });
-      gsap.set(logoMark, { opacity: .9, scale: 1, filter: 'blur(0px)' });
-      gsap.set(product, { xPercent: -53, yPercent: -50, opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' });
-      gsap.set(video, { opacity: 1, scale: 1 });
-    } else {
-      playHeroEntrance();
-      playIntroReveal();
-    }
-    ScrollTrigger.refresh();
-  });
+  if (reduceMotion) {
+    unlockScroll();
+    gsap.set('[data-reveal]', { autoAlpha: 1, y: 0, filter: 'blur(0px)' });
+    gsap.set('#florasis .intro-logo', { scale: 1, filter: 'blur(0px)' });
+    gsap.set(logoMark, { opacity: .9, scale: 1, filter: 'blur(0px)' });
+    gsap.set(product, { xPercent: -53, yPercent: -50, opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' });
+    gsap.set(video, { opacity: 1, scale: 1 });
+  } else {
+    playHeroEntrance();
+    playIntroReveal();
+  }
+  ScrollTrigger.refresh();
+
+  // A second, cheap refresh once every asset has actually finished
+  // loading — covers any late web-font swap or image decode that
+  // nudged section heights after the measurement above.
+  window.addEventListener('load', () => ScrollTrigger.refresh());
 </script>
 </body>
 </html>
