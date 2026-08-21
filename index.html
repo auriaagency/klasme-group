@@ -231,7 +231,7 @@
       animation: reveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) 1.4s forwards;
     }
 
-    .rotator > span {
+    .rotator>span {
       position: absolute;
       left: 50%;
       top: 0;
@@ -248,7 +248,7 @@
       transition: opacity 0.6s ease, transform 0.6s ease;
     }
 
-    .rotator > span.is-active {
+    .rotator>span.is-active {
       opacity: 1;
       transform: translate(-50%, 0);
     }
@@ -585,7 +585,7 @@
     /* Email signup — envia para uma planilha do Google Sheets via Apps Script.
        O deploy do Apps Script não retorna cabeçalhos CORS legíveis, então o
        fetch usa mode: 'no-cors' — a resposta fica opaca (não dá pra ler o
-       corpo), mas o envio em si funciona normalmente. */
+       corpo) - mas o envio em si funciona normalmente. */
     var SHEET_ENDPOINT = 'https://script.google.com/macros/s/AKfycby1KqSJwX78SI3dHAavlIbFaO8jOM7e2JQEQom7slB5k4C-gQr8ISG7_UyW7MsYrk8e/exec';
 
     var signupForm = document.getElementById('signup-form');
